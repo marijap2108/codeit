@@ -1,0 +1,43 @@
+.about {
+  padding: 120px 32px 80px 32px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 10;
+  background-color: blue;
+  clip-path: circle(70% at 50% -20%);
+}
+
+.aboutLeft {
+  width: 60%;
+  h1 {
+    color: white;
+    font-size: 44px;
+  }
+  p {
+    color: white;
+    font-size: 18px;
+    font-weight: normal;
+  }
+}
+
+.aboutRight {
+  width: 35%;
+}
+
+.features {
+  padding: 48px 32px 80px 32px;
+}
+
+.featuresHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.featureList {
+  display: flex;
+  justify-content: space-around;
+}
+
+.feature {
+  border: 1px solid black;
+}

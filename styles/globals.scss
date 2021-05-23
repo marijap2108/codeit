@@ -1,16 +1,16 @@
+:root {
+  --text-color: white;
+  --color-primary: #ff8038;
+  --color-secondary: #265f7b;
+  --color-primary-darker: #d66d30;
+  --color-secondary-darker: #1b4458;
+  --color-bg: whitesmoke;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-* {
-  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }

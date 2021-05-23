@@ -1,0 +1,21 @@
+.navBar {
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.left {
+  display: flex;
+  justify-content: space-between;
+  gap: 100px;
+}
+
+.right {
+  display: flex;
+  gap: 12px;
+}
