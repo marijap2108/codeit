@@ -5,9 +5,10 @@ export const Button = ({
   variant="contained",
   size="normal",
   children,
+  ...rest
 }) => {
     return (
-      <button className={`${styles.button} ${styles[size]} ${styles[variant]}`}>{children}</button>
+      <button className={`${styles.button} ${styles[size]} ${styles[variant]}`} {...rest}>{children}</button>
     )
 }
 
