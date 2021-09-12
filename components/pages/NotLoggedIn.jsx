@@ -1,4 +1,4 @@
-import {NavBar, Button} from '../uiCompents'
+import {NavBar, Button} from '../uiComponents'
 import styles from './NotLoggedIn.module.scss'
 import Image from 'next/image'
 

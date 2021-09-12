@@ -1,11 +1,20 @@
+import React, { useCallback, useState } from 'react'
+import {Button} from '../uiComponents'
+import styles from './Authentication.module.scss'
+
 export const Authentication = ({
   isLogIn,
 }) => {
 
+  const [logIn, setLogIn] = useState(isLogIn)
+
+  const toggleLogIn = useCallback(() => {
+    setLogIn(currentLogIn => !currentLogIn)
+  }, [])
+
 	return (
-    <form>
-      {`${isLogIn}`}
-      {isLogIn ?
+    <form className={styles.authentication}>
+      {logIn ?
         <>
           <label>
             Username:
@@ -15,10 +24,12 @@ export const Authentication = ({
             Password:
             <input type="password" />
           </label>
-          <label>
-            <input type="checkbox" />
-            Stay signed in
-          </label>
+          <Button>
+            Log in
+          </Button>
+          <Button onClick={toggleLogIn}>
+            Sign up
+          </Button>
         </>
       :
         <>
@@ -34,6 +45,12 @@ export const Authentication = ({
             Password:
             <input type="password" />
           </label>
+          <Button>
+            Sign up
+          </Button>
+          <Button onClick={toggleLogIn}>
+            Log in
+          </Button>
         </>
       }
     </form>
