@@ -8,7 +8,16 @@ const createUser = async (req, res) => {
   if (!username || !email || !password) {
     return res.status(300).json()
   }
-  return res.status(200).json({username: username, password: password})
+
+  const newUser = {
+    username: username,
+    email: email,
+    password: password,
+  }
+
+  const result = await db.collection("user").insertOne(newUser)
+
+  return res.status(200).json({id: result.insertedId, username, email})
 }
 
 const editUser = async (req, res) => {

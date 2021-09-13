@@ -1,16 +1,39 @@
 import React, { useCallback, useState } from 'react'
 import {Button} from '../uiComponents'
 import styles from './Authentication.module.scss'
+import { useCookies } from 'react-cookie';
 
 export const Authentication = ({
   isLogIn,
 }) => {
 
+  const initialForm = {username: "", email: "", password: ""}
+
   const [logIn, setLogIn] = useState(isLogIn)
+  const [form, setForm] = useState(initialForm)
+  const [_cookies, setCookie] = useCookies(['codeItId'])
+
+  const changeValue = useCallback(({ target }) => {
+    setForm(curForm => ({...curForm, [target.id]: target.value}))
+  }, [])
 
   const toggleLogIn = useCallback(() => {
+    setForm(initialForm)
     setLogIn(currentLogIn => !currentLogIn)
   }, [])
+
+  const submitSignIn = useCallback(() => {
+    fetch("http://localhost:3000/api/user", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    })
+    .then(response => response.json())
+    .then(data => {
+      setCookie('codeItId', data.id, { path: '/' })
+      console.log(data)
+    })
+  }, [form])
 
 	return (
     <form className={styles.authentication}>
@@ -18,11 +41,11 @@ export const Authentication = ({
         <>
           <label>
             Username:
-            <input type="text" />
+            <input onChange={changeValue} id="username" value={form.username} type="text" />
           </label>
           <label>
             Password:
-            <input type="password" />
+            <input onChange={changeValue} id="password" value={form.password} type="password" />
           </label>
           <Button>
             Log in
@@ -35,17 +58,17 @@ export const Authentication = ({
         <>
         <label>
             Username:
-            <input type="text" />
+            <input onChange={changeValue} id="username" value={form.username} type="text" />
           </label>
           <label>
             Email:
-            <input type="email" />
+            <input onChange={changeValue} id="email" value={form.email} type="email" />
           </label>
           <label>
             Password:
-            <input type="password" />
+            <input onChange={changeValue} id="password" value={form.password} type="password" />
           </label>
-          <Button>
+          <Button onClick={submitSignIn}>
             Sign up
           </Button>
           <Button onClick={toggleLogIn}>
