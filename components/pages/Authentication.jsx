@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react'
 import {Button} from '../uiComponents'
 import styles from './Authentication.module.scss'
 import { useCookies } from 'react-cookie';
+import Router from 'next/router'
 
 export const Authentication = ({
   isLogIn,
@@ -21,6 +22,18 @@ export const Authentication = ({
     setForm(initialForm)
     setLogIn(currentLogIn => !currentLogIn)
   }, [])
+
+  const submitLogIn = useCallback(() => {
+    fetch(`http://localhost:3000/api/user?username=${form.username}&password=${form.password}`,{
+      method: "GET"
+    }) 
+    .then(response => response.json())
+    .then(data => {
+      setCookie('codeItId', data.id, { path: '/' })
+      console.log(data)
+      Router.reload(window.location.pathname)
+    })
+  }, [form])
 
   const submitSignIn = useCallback(() => {
     fetch("http://localhost:3000/api/user", {
@@ -47,7 +60,7 @@ export const Authentication = ({
             Password:
             <input onChange={changeValue} id="password" value={form.password} type="password" />
           </label>
-          <Button>
+          <Button onClick={submitLogIn}>
             Log in
           </Button>
           <Button onClick={toggleLogIn}>
