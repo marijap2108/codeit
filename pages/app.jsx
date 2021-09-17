@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useCookies } from 'react-cookie';
+import { Post } from '../components/uiComponents'
 
 export const App = () => {
 
@@ -21,5 +22,8 @@ export const App = () => {
     }
   }, [])
 
-  return <div>rasa{user.username}</div>
+  return <div>
+    rasa{user.username}
+    <Post/>
+  </div>
 }
