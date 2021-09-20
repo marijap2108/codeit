@@ -1,5 +1,6 @@
 export * from './Button'
 export * from './NavBar'
+export * from './MenuBar'
 export * from './Modal'
 export * from './Post'
 export * from './Card'

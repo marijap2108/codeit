@@ -1,0 +1,27 @@
+.menuBar {
+  grid-area: menuBar;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  width: 170px;
+}
+
+.right {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.user {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px 18px;
+  gap: 4px;
+}

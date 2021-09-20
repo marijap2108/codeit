@@ -1,5 +1,6 @@
 import styles from './Post.module.scss'
 import { Card } from '../index'
+import { FiThumbsUp, FiThumbsDown, FiMoreHorizontal } from "react-icons/fi";
 
 export const Post = ({
   title,
@@ -18,14 +19,14 @@ export const Post = ({
 					<div className="title">{title}</div>
 					<div className="data">{creatorName} | {time}</div>
 				</div>
-				<div className="dropdown">...</div>
+				<FiMoreHorizontal />
 			</div>
 			<div className={styles.body}>
 				{body}
 			</div>
 			<div className={styles.footer}>
 				<div className="votes">
-					^ {votes} v
+					<FiThumbsUp/> {votes} <FiThumbsDown/>
 				</div>
 				<div className="media">
 					Share Save Comment

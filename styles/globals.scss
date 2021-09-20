@@ -9,12 +9,58 @@
   --card-radius: 15px;
   --card-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
   --card-padding: 12px 14px;
+  --input-radius: 8px;
+  --input-border: 1px black solid;
+  --input-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 }
 
 html,
 body {
   padding: 0;
   margin: 0;
+  background-color: var(--color-bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+input {
+  border-radius: 8px;
+  border: var(--input-border);
+  transition-duration: 0.3s;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--input-shadow);
+  }
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 200px auto;
+  grid-template-rows: 64px auto;
+  grid-template-areas:
+    "menuBar menuBar"
+    "groups main";
+
+  &__groups {
+    grid-area: groups;
+    position: sticky;
+    top: 0;
+    bottom: 0;
+  }
+
+  &__main {
+    grid-area: main;
+    display: flex;
+
+    &__posts {
+      flex-grow: 1;
+      padding: 0 20px;
+    }
+
+    &__suggested {
+      width: 300px;
+    }
+  }
 }

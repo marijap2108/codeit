@@ -21,7 +21,16 @@ const createUser = async (req, res) => {
 }
 
 const editUser = async (req, res) => {
-  return res.status(200).json({rasa: "haha"})
+  const {db} = await connectToDatabase()
+  const {id, password} = req.body
+
+  if (!id) {
+    return res.status(300).json()
+  }
+
+  const result = await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {password: password}})
+
+  return res.status(200).json(result)
 }
 
 const getUser = async (req, res) => {
@@ -35,7 +44,10 @@ const getUser = async (req, res) => {
   let result;
 
   if (id) {
-    result = await db.collection("user").findOne({ '_id': new  ObjectId(id) })
+    result = await db.collection("user").findOne({ '_id': new  ObjectId(id)})
+    if (result.groups) {
+      result.groups = await db.collection("group").find({_id: result.groups})
+    }
     return res.status(200).json(result)
 
   } else {
