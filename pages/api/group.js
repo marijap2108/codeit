@@ -9,16 +9,16 @@ const createGroup = async (req, res) => {
     return res.status(300).json()
   }
 
-  const newPost = {
+  const newGroup = {
     title: title,
     description: description,
     createdBy: createdBy,
     createdOn: Date.now()
   }
 
-  const result = await db.collection("post").insertOne(newPost)
+  const result = await db.collection("group").insertOne(newGroup)
 
-  return res.status(200).json({...newPost, id: result.insertedId})
+  return res.status(200).json({...newGroup, id: result.insertedId})
 }
 
 const editGroup = async (req, res) => {
@@ -29,27 +29,27 @@ const editGroup = async (req, res) => {
     return res.status(300).json()
   }
 
-  const result = await db.collection("post").updateOne({'_id': new  ObjectId(id)},{$set: {description: description}})
+  const result = await db.collection("group").updateOne({'_id': new  ObjectId(id)},{$set: {description: description}})
 
   return res.status(200).json(result)
 }
 
 const getGroup = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {id, name} = req.query
+  const {id, title} = req.query
 
-  if (!id && !name) {
+  if (!id && !title) {
     return res.status(300).json()
   }
 
   let result;
 
   if (id) {
-    result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
+    result = await db.collection("group").findOne({ '_id': new  ObjectId(id) })
     result = [result]
   }
-  if (name) {
-    result = await db.collection("group").find({name: new RegExp(name, 'i')}).toArray()
+  if (title) {
+    result = await db.collection("group").find({title: new RegExp(title, 'i')}).toArray()
   }
 
   return res.status(200).json(result)

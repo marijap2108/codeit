@@ -39,7 +39,7 @@ export const Authentication = ({
     fetch("http://localhost:3000/api/user", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: form
     })
     .then(response => response.json())
     .then(data => {

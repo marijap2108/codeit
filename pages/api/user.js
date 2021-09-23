@@ -13,11 +13,43 @@ const createUser = async (req, res) => {
     username: username,
     email: email,
     password: password,
+    groups: []
   }
 
   const result = await db.collection("user").insertOne(newUser)
 
   return res.status(200).json({id: result.insertedId, username, email})
+}
+
+const handleGroup = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const cookies = req.cookies
+
+  const {follow, unfollow} = req.query
+
+  const {groups} = await db.collection("user").findOne({ _id : new ObjectId(cookies.codeItId) })
+
+  if (follow) {
+    if (groups.includes(follow)) {
+      return res.status(300).json()
+    }
+    groups.push(follow)
+
+    const result = await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {groups: groups}})
+
+    return res.status(200).json(result)
+
+  }
+
+  if (unfollow) {
+    groups.splice(groups.indexOf(unfollow), 1)
+
+    const result = await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {groups: groups}})
+
+    return res.status(200).json(result)
+
+  }
+
 }
 
 const editUser = async (req, res) => {
@@ -46,7 +78,7 @@ const getUser = async (req, res) => {
   if (id) {
     result = await db.collection("user").findOne({ '_id': new  ObjectId(id)})
     if (result.groups) {
-      result.groups = await db.collection("group").find({_id: result.groups})
+      result.groups = await db.collection("group").find({_id: result.groups.map(v => new ObjectId(v))})
     }
     return res.status(200).json(result)
 
@@ -62,6 +94,9 @@ export default async (req, res) => {
     case "POST":
       return await createUser(req, res)
     case "PUT":
+      if (req.query.follow || req.query.unfollow) {
+        return await handleGroup(req, res)
+      }
       return await editUser(req, res)
     case "GET":
       return await getUser(req, res)

@@ -35,9 +35,14 @@ input {
   }
 }
 
+h4 {
+  margin: 8px 0;
+}
+
 .app {
+  position: relative;
   display: grid;
-  grid-template-columns: 200px auto;
+  grid-template-columns: 200px 1fr;
   grid-template-rows: 64px auto;
   grid-template-areas:
     "menuBar menuBar"
@@ -45,22 +50,46 @@ input {
 
   &__groups {
     grid-area: groups;
-    position: sticky;
-    top: 0;
-    bottom: 0;
+    padding: 0 24px;
+    background-color: white;
+
+    &__content {
+      position: sticky;
+      top: 70px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
   }
 
   &__main {
     grid-area: main;
     display: flex;
+    overflow: hidden;
+    padding-top: 24px;
 
     &__posts {
-      flex-grow: 1;
       padding: 0 20px;
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      gap: 24px;
+
+      &__suggested {
+        display: flex;
+        gap: 24px;
+        width: calc(100vw - 350px - 200px);
+        padding: 12px 0;
+        scrollbar-width: none;
+      }
     }
 
     &__suggested {
       width: 300px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
   }
 }

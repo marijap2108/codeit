@@ -38,15 +38,26 @@ const editPost = async (req, res) => {
   return res.status(200).json(result)
 }
 
-const getPost = async (req, res) => {
+const getGroups = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {id} = req.query
+  const {codeItId} = req.cookies
 
-  if (!id) {
+  const {groups} = await db.collection("user").findOne({ _id : new ObjectId(codeItId) })
+
+  const result = await db.collection("group").find({_id: { $in: groups.map(group => new ObjectId(group)) }}).toArray()
+
+  return res.status(200).json(result)
+}
+
+const getSuggestedGroups = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const {type} = req.query
+
+  if (!type) {
     return res.status(300).json()
   }
 
-  const result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
+  const result = await db.collection("group").find().sort({datefield: -1}).limit(3).toArray()
 
   return res.status(200).json(result)
 }
@@ -58,7 +69,11 @@ export default async (req, res) => {
     case "PUT":
       return await editPost(req, res)
     case "GET":
-      return await getPost(req, res)
+      const {type} = req.query
+      if (type === 'suggested') {
+        return await getSuggestedGroups(req, res)
+      }
+      return await getGroups(req, res)
     default:
       return res.status(404).json()
   }
