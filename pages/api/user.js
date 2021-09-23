@@ -21,6 +21,28 @@ const createUser = async (req, res) => {
   return res.status(200).json({id: result.insertedId, username, email})
 }
 
+const handleSavePost = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const cookies = req.cookies
+
+  const {postId} = req.body
+
+  const {posts} = await db.collection("user").findOne({ _id : new ObjectId(cookies.codeItId) })
+
+  if (!posts.includes(postId)) {
+    posts.push(postId)
+
+    await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {posts: posts}})
+  } else {
+    posts.splice(posts.indexOf(postId), 1)
+
+    await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {posts: posts}})
+  }
+
+  return res.status(200).json({saved: posts.includes(postId)})
+
+}
+
 const handleGroup = async (req, res) => {
   const {db} = await connectToDatabase()
   const cookies = req.cookies
@@ -94,6 +116,9 @@ export default async (req, res) => {
     case "POST":
       return await createUser(req, res)
     case "PUT":
+      if (req.body.postId) {
+        return await handleSavePost(req, res)
+      }
       if (req.query.follow || req.query.unfollow) {
         return await handleGroup(req, res)
       }

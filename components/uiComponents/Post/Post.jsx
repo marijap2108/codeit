@@ -1,7 +1,16 @@
 import styles from './Post.module.scss'
 import { Card, DropDown } from '../index'
 import { FiThumbsUp, FiThumbsDown, FiMoreHorizontal, FiShare2, FiSave, FiMessageSquare } from "react-icons/fi";
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EmailShareButton,
+  FacebookShareButton,
+  LinkedinShareButton,
+  RedditShareButton,
+  TelegramShareButton,
+  TwitterShareButton,
+  WorkplaceShareButton
+} from "react-share";
 
 export const Post = ({
 	postId,
@@ -16,7 +25,11 @@ export const Post = ({
 	isUserCreator,
 	openPost,
 	editPosts,
+	isSaved,
 }) => {
+
+	const [url, setUrl] = useState('')
+	const [saved, setSaved] = useState(isSaved)
 
 	const getTime = useMemo(() => {
 		var difference = Date.now() - createdOn;
@@ -111,6 +124,22 @@ export const Post = ({
     })
 	}, [])
 
+	const handleSavePost = useCallback(() => {
+		fetch(`http://localhost:3000/api/user`, {
+			method: "PUT",
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({postId: postId})
+		})    
+		.then(response => response.json())
+    .then(data => {
+			setSaved(data.saved)
+    })
+	}, [])
+
+	useEffect(() => {
+		setUrl(window.location.href)
+	}, [])
+
   return(
     <Card>
 			<div className={styles.header}>
@@ -132,11 +161,22 @@ export const Post = ({
 					<FiThumbsDown onClick={handleVote('votesDown')} fill={votesDown ?.includes(userId) ? "red" : "white"}/>
 				</div>
 				<div className={styles.media}>
-					<span>
-						<FiShare2 /> Share
-					</span>
-					<span>
-						<FiSave /> Save
+					<DropDown
+						target={<><FiShare2 /> Share</>}
+						children={
+							<>
+								<EmailShareButton url={`${url}post/${postId}`}> Share on email </EmailShareButton> <br />
+								<FacebookShareButton url={`${url}post/${postId}`}> Share on facebook </FacebookShareButton> <br />
+								<LinkedinShareButton url={`${url}post/${postId}`}> Share on linkedIn </LinkedinShareButton> <br />
+								<RedditShareButton url={`${url}post/${postId}`}> Share on reddit </RedditShareButton> <br />
+								<TelegramShareButton url={`${url}post/${postId}`}> Share on telegram </TelegramShareButton> <br />
+								<TwitterShareButton url={`${url}post/${postId}`}> Share on twitter </TwitterShareButton> <br />
+								<WorkplaceShareButton url={`${url}post/${postId}`}> Share on workplace </WorkplaceShareButton> <br />
+							</>
+						}
+					/>
+					<span onClick={handleSavePost}>
+						<FiSave fill={saved ? "lightseagreen" : "white"} /> Save
 					</span>
 					<span onClick={openPost}>
 						<FiMessageSquare /> Comment

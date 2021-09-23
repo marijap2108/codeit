@@ -15,7 +15,7 @@ export const App = () => {
   const router = useRouter()
 
   const [cookies] = useCookies(['codeItId'])
-  const [user, setUser] = useState({username: sessionStorage.getItem('username'), email: sessionStorage.getItem('email')})
+  const [user, setUser] = useState({username: '', email: '', posts: []})
   const [newPost, setNewPost] = useState({isOpen: false, title: '', body: '', group: ''})
   const [posts, setPosts] = useState([])
   const [suggested, setSuggested] = useState([])
@@ -25,17 +25,13 @@ export const App = () => {
   const [sort, setSort] = useState('hot')
 
   useEffect(() => {
-    if (!user.username) {
-      fetch(`http://localhost:3000/api/user?id=${cookies.codeItId}`, {
-        method: "GET"
-      }) 
-      .then(response => response.json())
-      .then(data => {
-        sessionStorage.setItem('username', data.username)
-        sessionStorage.setItem('email', data.email)
-        setUser({username: data.username, email: data.email})
-      })
-    }
+    fetch(`http://localhost:3000/api/user?id=${cookies.codeItId}`, {
+      method: "GET"
+    }) 
+    .then(response => response.json())
+    .then(data => {
+      setUser({username: data.username, email: data.email, posts: data.posts})
+    })
 
     fetch(`http://localhost:3000/api/groups`, {
       method: "GET"
@@ -259,6 +255,7 @@ export const App = () => {
             openPost={openPost(post._id)}
             key={`post_${index}`}
             editPosts={editPosts}
+            isSaved={user['posts']?.includes(post._id)}
           />
         ))}
       </div>

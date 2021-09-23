@@ -20,6 +20,7 @@
     "react-icons": "^4.2.0",
     "react-popper": "^2.2.5",
     "react-query": "^3.13.4",
+    "react-share": "^4.4.0",
     "sass": "^1.32.8",
     "suneditor-react": "^3.3.0"
   }
