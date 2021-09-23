@@ -1,9 +1,10 @@
 import styles from './Post.module.scss'
-import { Card } from '../index'
+import { Card, DropDown } from '../index'
 import { FiThumbsUp, FiThumbsDown, FiMoreHorizontal, FiShare2, FiSave, FiMessageSquare } from "react-icons/fi";
 import { useCallback, useMemo } from 'react';
 
 export const Post = ({
+	postId,
   title,
 	creatorName,
 	createdOn,
@@ -14,6 +15,7 @@ export const Post = ({
 	groupName,
 	isUserCreator,
 	openPost,
+	editPosts,
 }) => {
 
 	const getTime = useMemo(() => {
@@ -76,12 +78,37 @@ export const Post = ({
 
 	}, [votesUp, votesDown])
 
-	const handleVoteUp = useCallback(() => {
-
+	const dropDownChildren = useMemo(() => {
+		return isUserCreator ?
+			<>
+				<div>
+					Edit
+				</div>
+				<div>
+					Delete
+				</div>
+			</>
+			:
+			<>
+				<div>
+					Save
+				</div>
+				<div>
+					Hide
+				</div>
+			</>
 	}, [])
 
-	const handleVoteDown = useCallback(() => {
-		
+	const handleVote = useCallback((type) => () => {
+		fetch(`http://localhost:3000/api/post`, {
+			method: "PUT",
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({type: type, id: postId})
+		})    
+		.then(response => response.json())
+    .then(data => {
+			editPosts(data)
+    })
 	}, [])
 
   return(
@@ -92,16 +119,17 @@ export const Post = ({
 					<div className={styles.title}>{title}</div>
 					<div className={styles.data}>{creatorName || 'user'} | {getTime} | {groupName}</div>
 				</div>
-				<FiMoreHorizontal />
+				<DropDown 
+					target={<FiMoreHorizontal />}
+					children={dropDownChildren}
+				/>
 			</div>
-			<div className={styles.body}>
-				{body}
-			</div>
+			<div dangerouslySetInnerHTML={{ __html: body }} className={styles.body} />
 			<div className={styles.footer}>
 				<div className={styles.votes}>
-					<FiThumbsUp onClick={handleVoteUp} fill={votesUp?.includes(userId) ? "green" : "white"}/> 
+					<FiThumbsUp onClick={handleVote('votesUp')} fill={votesUp?.includes(userId) ? "green" : "white"}/> 
 						<span>{getVotes}</span> 
-					<FiThumbsDown onClick={handleVoteDown} fill={votesDown ?.includes(userId) ? "red" : "white"}/>
+					<FiThumbsDown onClick={handleVote('votesDown')} fill={votesDown ?.includes(userId) ? "red" : "white"}/>
 				</div>
 				<div className={styles.media}>
 					<span>

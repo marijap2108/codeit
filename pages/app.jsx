@@ -2,6 +2,12 @@ import React, { useCallback, useEffect, useState } from "react"
 import { useCookies } from 'react-cookie';
 import { Button, Card, MenuBar, Post } from '../components/uiComponents'
 import Router, { useRouter } from 'next/router'
+import dynamic from "next/dynamic";
+import 'suneditor/dist/css/suneditor.min.css';
+
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
 
 
 export const App = () => {
@@ -96,8 +102,8 @@ export const App = () => {
     setNewPost(post => ({...post, title: target.value}))
   }, [])
 
-  const handleBodyChange = useCallback(({target}) => {
-    setNewPost(post => ({...post, body: target.value}))
+  const handleBodyChange = useCallback((value) => {
+    setNewPost(post => ({...post, body: value}))
   }, [])
 
   const handleGroupSelect = useCallback(({target}) => {
@@ -164,6 +170,10 @@ export const App = () => {
     })
   }, [])
 
+  const editPosts = useCallback((newPost) => {
+    setPosts(v => v.map(oldPost => oldPost._id === newPost._id ? newPost : oldPost))
+  }, [])
+
   return <div className="app">
     <MenuBar />
     <div className="app__groups">
@@ -196,7 +206,7 @@ export const App = () => {
             <input onChange={handleTitleChange} value={newPost.title}/>
             {newPost.isOpen ? 
               <div>
-                <input onChange={handleBodyChange} value={newPost.body}/>
+                <SunEditor defaultValue={newPost.body} onChange={handleBodyChange}/>
                 <select value={newPost.group} onChange={handleGroupSelect}>
                   <option value="">None</option>
                   {groups.map((group, index) => 
@@ -236,6 +246,7 @@ export const App = () => {
         </Card>
         {posts.map((post, index) => (
           <Post
+            postId={post._id}
             title={post.title}
             creatorName={post.creatorName}
             createdOn={post.createdOn}
@@ -247,6 +258,7 @@ export const App = () => {
             groupName={groups.find(group => group._id === post.groupId)?.title || 'group'}
             openPost={openPost(post._id)}
             key={`post_${index}`}
+            editPosts={editPosts}
           />
         ))}
       </div>

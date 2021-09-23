@@ -4,10 +4,11 @@ import { useCookies } from 'react-cookie';
 import { FiSettings } from "react-icons/fi";
 import { useCallback, useEffect, useState } from 'react';
 import Router from 'next/router'
+import { DropDown } from '..';
 
 export const MenuBar = () => {
 
-	const [cookies] = useCookies(['codeItId'])
+	const [cookies, removeCookie] = useCookies(['codeItId'])
 	const [search, setSearch] = useState('')
 	const [username, setUsername] = useState('')
 
@@ -28,6 +29,17 @@ export const MenuBar = () => {
 		Router.push({
 			pathname: `/user/${cookies.codeItId}`,
 		})
+	}, [])
+
+	const handleLogOut = useCallback(() => {
+		removeCookie("codeItId")
+		Router.push({
+			pathname: '/'
+		})
+	}, [])
+
+	const handleCreateGroup = useCallback(() => {
+		
 	}, [])
 
 	const onLogoClick = useCallback(() => {
@@ -51,7 +63,17 @@ export const MenuBar = () => {
 					<img width="40" height="40" src={`https://avatars.dicebear.com/api/bottts/${username}.svg`} />
 					{username}
 				</div>
-				 <FiSettings fontSize={18} />
+					<DropDown
+						target={<FiSettings fontSize={18} />}
+						children={
+							<>
+								<div onClick={handleProfileClick}>Profile</div>
+								<div onClick={handleCreateGroup}>Create Group</div>
+								<div>Switch theme</div>
+								<div onClick={handleLogOut}>Log Out</div>
+							</>
+						}
+					/>
 			</span>
 		</nav>
 	)

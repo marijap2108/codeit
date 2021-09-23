@@ -19,7 +19,21 @@
 }
 
 .body {
-  margin: 14px 0px;
+  padding: 14px 0px;
+  max-height: 300px;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    left: 0;
+    top: 100%;
+    box-shadow: 0px 0px 10px 15px white;
+  }
 }
 
 .votes {

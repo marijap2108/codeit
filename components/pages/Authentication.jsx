@@ -45,6 +45,7 @@ export const Authentication = ({
     .then(data => {
       setCookie('codeItId', data.id, { path: '/' })
       console.log(data)
+      Router.reload(window.location.pathname)
     })
   }, [form])
 

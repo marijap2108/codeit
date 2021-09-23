@@ -76,7 +76,7 @@ const getUser = async (req, res) => {
   let result;
 
   if (id) {
-    result = await db.collection("user").findOne({ '_id': new  ObjectId(id)})
+    result = await db.collection("user").findOne({ '_id': new ObjectId(id)})
     if (result.groups) {
       result.groups = await db.collection("group").find({_id: result.groups.map(v => new ObjectId(v))})
     }

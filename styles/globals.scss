@@ -74,13 +74,12 @@ h4 {
       flex-grow: 1;
       flex-direction: column;
       gap: 24px;
+      width: calc(100vw - 600px);
 
       &__suggested {
         display: flex;
         gap: 24px;
-        width: calc(100vw - 350px - 200px);
         padding: 12px 0;
-        scrollbar-width: none;
       }
     }
 

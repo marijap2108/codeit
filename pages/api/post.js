@@ -38,6 +38,39 @@ const editPost = async (req, res) => {
   return res.status(200).json(result)
 }
 
+const handleVote = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const cookies = req.cookies
+
+  const opposite = {
+    votesUp: 'votesDown',
+    votesDown: 'votesUp'
+  }
+
+  const {type, id} = req.body
+
+  const post = await db.collection("post").findOne({ _id : new ObjectId(id) })
+
+  if (!post[type].includes(cookies.codeItId)) {
+
+    if (post[opposite[type]].includes(cookies.codeItId)) {
+      post[opposite[type]].splice(post[opposite[type]].indexOf(cookies.codeItId), 1)
+    }
+
+    post[type].push(cookies.codeItId)
+
+    await db.collection("post").updateOne({'_id': new  ObjectId(id)}, {$set: post})
+  } else {
+    post[type].splice(post[type].indexOf(cookies.codeItId), 1)
+
+    await db.collection("post").updateOne({'_id': new  ObjectId(id)}, {$set: post})
+  }
+
+  const result = await db.collection("post").findOne({'_id': new  ObjectId(id)})
+
+  return res.status(200).json(result)
+}
+
 const getPost = async (req, res) => {
   const {db} = await connectToDatabase()
   const {id} = req.query
@@ -56,6 +89,9 @@ export default async (req, res) => {
     case "POST":
       return await createPost(req, res)
     case "PUT":
+      if (req.body.type) {
+        return await handleVote(req, res)
+      }
       return await editPost(req, res)
     case "GET":
       return await getPost(req, res)
