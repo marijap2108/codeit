@@ -13,12 +13,26 @@
   display: flex;
   align-items: center;
   width: 170px;
+  cursor: pointer;
 }
 
 .right {
   display: flex;
   justify-content: right;
   align-items: center;
+  width: calc(60% - 170px);
+  min-width: 300px;
+}
+
+.search {
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 125px;
+  cursor: pointer;
+  padding: 4px;
 }
 
 .user {

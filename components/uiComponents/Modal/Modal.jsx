@@ -1,5 +1,4 @@
 import styles from './Modal.module.scss'
-import PropTypes from 'prop-types'
 import {Portal} from './Portal'
 import { useCallback } from 'react'
 

@@ -1,22 +1,40 @@
 import { connectToDatabase } from "../../utils/mongodb"
 import { ObjectId } from 'mongodb';
+import { handleGroup } from "./user";
 
 const createGroup = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {title, description, createdBy} = req.body
+  const {title, description} = req.body
+  const cookies = req.cookies
 
-  if (!title || !description || !createdBy) {
+  if (!title || !description) {
     return res.status(300).json()
+  }
+
+  let hash = 0
+  let color = '#';
+
+  for (var i = 0; i < title.length; i++) {
+    hash = title.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
+  }
+
+  for (var i = 0; i < 3; i++) {
+      var value = (hash >> (i * 8)) & 255;
+      color += ('00' + value.toString(16)).substr(-2);
   }
 
   const newGroup = {
     title: title,
     description: description,
-    createdBy: createdBy,
+    color: color,
+    createdBy: cookies.codeItId,
     createdOn: Date.now()
   }
 
   const result = await db.collection("group").insertOne(newGroup)
+
+  await handleGroup(result.insertedId, null, cookies, res)
 
   return res.status(200).json({...newGroup, id: result.insertedId})
 }

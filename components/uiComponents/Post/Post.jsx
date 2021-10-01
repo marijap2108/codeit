@@ -11,6 +11,9 @@ import {
   TwitterShareButton,
   WorkplaceShareButton
 } from "react-share";
+import { Modal } from '../Modal';
+import { Button } from '../Button';
+import Router from 'next/router'
 
 export const Post = ({
 	postId,
@@ -23,13 +26,15 @@ export const Post = ({
 	userId,
 	groupName,
 	isUserCreator,
-	openPost,
 	editPosts,
 	isSaved,
+	deletePost,
 }) => {
 
 	const [url, setUrl] = useState('')
 	const [saved, setSaved] = useState(isSaved)
+	const [isModalOpen, setIsModalOpen] = useState(false)
+	const [modalChildren, setModalChildren] = useState()
 
 	const getTime = useMemo(() => {
 		var difference = Date.now() - createdOn;
@@ -91,13 +96,52 @@ export const Post = ({
 
 	}, [votesUp, votesDown])
 
+	const handleCloseModal = useCallback(() => {
+		setIsModalOpen(false)
+	}, [])
+
+	const handleDeletePost = useCallback(() => {
+		fetch(`http://localhost:3000/api/post?id=${postId}`, {
+      method: "DELETE"
+    })
+    .then(response => response.json())
+    .then(data => {
+			handleCloseModal()
+      deletePost(data)
+    })
+	}, [])
+
+	const handleDeletePostModal = useCallback(() => {
+		setIsModalOpen(true)
+		setModalChildren(
+			<form>
+				<h3>Delete Post</h3>
+				<Button onClick={handleDeletePost}>Yes</Button>
+				<Button onClick={handleCloseModal}>No</Button>
+			</form>
+		)
+	}, [])
+
+	const handleEdit = useCallback(() => {
+    Router.push({
+      pathname: `/post/${postId}`,
+			query: { edit: true },
+    })
+	}, [])
+
+	const openPost = useCallback(() => {
+    Router.push({
+      pathname: `/post/${postId}`
+    })
+  }, [])
+
 	const dropDownChildren = useMemo(() => {
 		return isUserCreator ?
 			<>
-				<div>
+				<div onClick={handleEdit}>
 					Edit
 				</div>
-				<div>
+				<div onClick={handleDeletePostModal}>
 					Delete
 				</div>
 			</>
@@ -183,6 +227,12 @@ export const Post = ({
 					</span>
 				</div>
 			</div>
+			<Modal 
+				open={isModalOpen}
+				handleClose={handleCloseModal}
+			>
+				{modalChildren}
+			</Modal>
 		</Card>
 	)
 }

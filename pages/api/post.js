@@ -84,6 +84,26 @@ const getPost = async (req, res) => {
   return res.status(200).json(result)
 }
 
+const deletePost = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const {id} = req.query
+  const cookies = req.cookies
+
+  if (!id) {
+    return res.status(300).json()
+  }
+
+  const result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
+
+  if (result.createdBy === cookies.codeItId) {
+    await db.collection("post").deleteOne({ '_id': new  ObjectId(id) })
+
+    return res.status(200).json(result)
+  }
+
+  return res.status(400).json(result)
+}
+
 export default async (req, res) => {
   switch(req.method) {
     case "POST":
@@ -95,6 +115,8 @@ export default async (req, res) => {
       return await editPost(req, res)
     case "GET":
       return await getPost(req, res)
+    case "DELETE":
+      return await deletePost(req, res)
     default:
       return res.status(404).json()
   }

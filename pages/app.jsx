@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { useCookies } from 'react-cookie';
 import { Button, Card, MenuBar, Post } from '../components/uiComponents'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import dynamic from "next/dynamic";
 import 'suneditor/dist/css/suneditor.min.css';
 
@@ -160,14 +160,12 @@ export const App = () => {
 
   }, [sort])
 
-  const openPost = useCallback((id) => () => {
-    Router.push({
-      pathname: `/post/${id}`
-    })
-  }, [])
-
   const editPosts = useCallback((newPost) => {
     setPosts(v => v.map(oldPost => oldPost._id === newPost._id ? newPost : oldPost))
+  }, [])
+
+  const deletePost = useCallback((deletedPost) => {
+    setPosts(v => v.filter(post => post._id !== deletedPost._id))
   }, [])
 
   return <div className="app">
@@ -176,8 +174,11 @@ export const App = () => {
       <div className="app__groups__content">
         <h4>Following groups:</h4>
           {groups.map((group, index) => (
-            <Card onClick={handleFilterGroup(group._id)} key={`group_${index}`}>
-              {group.title}{selectedGroup === group._id ? "selected" : null}
+            <Card style={{cursor: 'pointer'}} onClick={handleFilterGroup(group._id)} key={`group_${index}`}>
+              <div className="app__groups__content__item">
+                {group.title}
+                <div style={{backgroundColor: group.color}} className={`${selectedGroup === group._id && "app__groups__content__item__flag--selected"} app__groups__content__item__flag`} />
+              </div>
             </Card>
           ))}
       </div>
@@ -252,9 +253,9 @@ export const App = () => {
             isUserCreator={post.createdBy === cookies.codeItId}
             userId={cookies.codeItId}
             groupName={groups.find(group => group._id === post.groupId)?.title || 'group'}
-            openPost={openPost(post._id)}
             key={`post_${index}`}
             editPosts={editPosts}
+            deletePost={deletePost}
             isSaved={user['posts']?.includes(post._id)}
           />
         ))}

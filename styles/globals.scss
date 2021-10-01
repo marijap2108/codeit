@@ -59,6 +59,38 @@ h4 {
       display: flex;
       flex-direction: column;
       gap: 14px;
+
+      &__item {
+        position: relative;
+
+        &__flag {
+          position: absolute;
+          top: -12px;
+          right: -14px;
+          bottom: -12px;
+          left: 80%;
+          clip-path: polygon(
+            75% 0%,
+            100% 50%,
+            75% 100%,
+            0% 100%,
+            25% 50%,
+            0% 0%
+          );
+          transition-duration: 0.3s;
+
+          &--selected {
+            clip-path: polygon(
+              100% 0,
+              100% 50%,
+              100% 100%,
+              0% 100%,
+              0 50%,
+              0% 0%
+            );
+          }
+        }
+      }
     }
   }
 

@@ -43,11 +43,8 @@ const handleSavePost = async (req, res) => {
 
 }
 
-const handleGroup = async (req, res) => {
+export const handleGroup = async (follow, unFollow, cookies, res) => {
   const {db} = await connectToDatabase()
-  const cookies = req.cookies
-
-  const {follow, unfollow} = req.query
 
   const {groups} = await db.collection("user").findOne({ _id : new ObjectId(cookies.codeItId) })
 
@@ -60,16 +57,14 @@ const handleGroup = async (req, res) => {
     const result = await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {groups: groups}})
 
     return res.status(200).json(result)
-
   }
 
-  if (unfollow) {
-    groups.splice(groups.indexOf(unfollow), 1)
+  if (unFollow) {
+    groups.splice(groups.indexOf(unFollow), 1)
 
     const result = await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {groups: groups}})
 
     return res.status(200).json(result)
-
   }
 
 }
@@ -120,7 +115,7 @@ export default async (req, res) => {
         return await handleSavePost(req, res)
       }
       if (req.query.follow || req.query.unfollow) {
-        return await handleGroup(req, res)
+        return await handleGroup(req.query.follow, req.query.unfollow, req.cookies, res)
       }
       return await editUser(req, res)
     case "GET":
