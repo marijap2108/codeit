@@ -9,7 +9,6 @@ const SunEditor = dynamic(() => import("suneditor-react"), {
   ssr: false,
 });
 
-
 export const App = () => {
 
   const router = useRouter()
@@ -175,8 +174,8 @@ export const App = () => {
         <h4>Following groups:</h4>
           {groups.map((group, index) => (
             <Card style={{cursor: 'pointer'}} onClick={handleFilterGroup(group._id)} key={`group_${index}`}>
-              <div className="app__groups__content__item">
-                {group.title}
+              <div title={group.title} className="app__groups__content__item">
+                <div className="app__groups__content__item__text" >{group.title}</div>
                 <div style={{backgroundColor: group.color}} className={`${selectedGroup === group._id && "app__groups__content__item__flag--selected"} app__groups__content__item__flag`} />
               </div>
             </Card>

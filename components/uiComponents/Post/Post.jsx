@@ -189,7 +189,7 @@ export const Post = ({
 			<div className={styles.header}>
 				<img width="24" height="24" src={`https://avatars.dicebear.com/api/bottts/${creatorName}.svg`} />
 				<div className={styles.text}>
-					<div className={styles.title}>{title}</div>
+					<div title={title} className={styles.title}>{title}</div>
 					<div className={styles.data}>{creatorName || 'user'} | {getTime} | {groupName}</div>
 				</div>
 				<DropDown 

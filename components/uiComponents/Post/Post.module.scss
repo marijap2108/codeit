@@ -6,16 +6,24 @@
 }
 
 .text {
-  flex-grow: 1;
+  width: calc(100% - 70px);
 }
 
 .title {
   font-size: 18px;
   font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 95%;
 }
 
 .data {
   font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 95%;
 }
 
 .body {
@@ -84,4 +92,5 @@
   justify-content: space-between;
   align-items: center;
   height: 26px;
+  user-select: none;
 }

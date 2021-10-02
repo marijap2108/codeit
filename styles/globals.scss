@@ -28,6 +28,7 @@ input {
   border-radius: 8px;
   border: var(--input-border);
   transition-duration: 0.3s;
+  padding: 4px 8px;
 
   &:focus-visible {
     outline: none;
@@ -62,6 +63,13 @@ h4 {
 
       &__item {
         position: relative;
+
+        &__text {
+          width: 80%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
 
         &__flag {
           position: absolute;
