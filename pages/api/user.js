@@ -13,7 +13,8 @@ const createUser = async (req, res) => {
     username: username,
     email: email,
     password: password,
-    groups: []
+    groups: [],
+    posts: []
   }
 
   const result = await db.collection("user").insertOne(newUser)
@@ -29,7 +30,7 @@ const handleSavePost = async (req, res) => {
 
   const {posts} = await db.collection("user").findOne({ _id : new ObjectId(cookies.codeItId) })
 
-  if (!posts.includes(postId)) {
+  if (!posts || !posts.includes(postId)) {
     posts.push(postId)
 
     await db.collection("user").updateOne({'_id': new  ObjectId(cookies.codeItId)},{$set: {posts: posts}})

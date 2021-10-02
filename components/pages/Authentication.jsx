@@ -30,7 +30,6 @@ export const Authentication = ({
     .then(response => response.json())
     .then(data => {
       setCookie('codeItId', data.id, { path: '/' })
-      console.log(data)
       Router.reload(window.location.pathname)
     })
   }, [form])
@@ -39,12 +38,11 @@ export const Authentication = ({
     fetch("http://localhost:3000/api/user", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: form
+      body: JSON.stringify(form)
     })
     .then(response => response.json())
     .then(data => {
       setCookie('codeItId', data.id, { path: '/' })
-      console.log(data)
       Router.reload(window.location.pathname)
     })
   }, [form])

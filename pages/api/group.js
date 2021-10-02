@@ -34,7 +34,7 @@ const createGroup = async (req, res) => {
 
   const result = await db.collection("group").insertOne(newGroup)
 
-  await handleGroup(result.insertedId, null, cookies, res)
+  await handleGroup(result.insertedId.toString(), null, cookies, res)
 
   return res.status(200).json({...newGroup, id: result.insertedId})
 }

@@ -29,11 +29,13 @@ const editPost = async (req, res) => {
   const {db} = await connectToDatabase()
   const {id, body} = req.body
 
-  if (!id) {
+  if (!id || !body) {
     return res.status(300).json()
   }
 
-  const result = await db.collection("post").updateOne({'_id': new  ObjectId(id)},{$set: {body: body}})
+  await db.collection("post").updateOne({'_id': new  ObjectId(id)},{$set: {body: body}})
+
+  const result = await db.collection("post").findOne({'_id': new  ObjectId(id)})
 
   return res.status(200).json(result)
 }

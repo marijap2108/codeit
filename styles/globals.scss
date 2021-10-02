@@ -48,6 +48,7 @@ h4 {
   grid-template-areas:
     "menuBar menuBar"
     "groups main";
+  min-height: 100vh;
 
   &__groups {
     grid-area: groups;

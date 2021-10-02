@@ -14,6 +14,12 @@ import {
 import { Modal } from '../Modal';
 import { Button } from '../Button';
 import Router from 'next/router'
+import dynamic from "next/dynamic";
+import 'suneditor/dist/css/suneditor.min.css';
+
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
 
 export const Post = ({
 	postId,
@@ -29,12 +35,18 @@ export const Post = ({
 	editPosts,
 	isSaved,
 	deletePost,
+	isEditable,
 }) => {
 
 	const [url, setUrl] = useState('')
 	const [saved, setSaved] = useState(isSaved)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [modalChildren, setModalChildren] = useState()
+	const [newBody, setNewBody] = useState('')
+
+	useEffect(() => {
+		setSaved(isSaved)
+	}, [isSaved])
 
 	const getTime = useMemo(() => {
 		var difference = Date.now() - createdOn;
@@ -184,6 +196,28 @@ export const Post = ({
 		setUrl(window.location.href)
 	}, [])
 
+	const handleBodyChange = useCallback((value) => {
+    setNewBody(value)
+  }, [])
+
+	const handleCancel = useCallback(() => {
+		Router.replace(`/post/${postId}`, undefined, { shallow: true });
+	}, [])
+
+	const handleEditPost = useCallback(() => {
+		fetch(`http://localhost:3000/api/post`, {
+			method: "PUT",
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({id: postId, body: newBody})
+		})    
+		.then(response => response.json())
+    .then(data => {
+			editPosts(data)
+			handleCancel()
+    })
+
+	}, [newBody])
+
   return(
     <Card>
 			<div className={styles.header}>
@@ -197,7 +231,15 @@ export const Post = ({
 					children={dropDownChildren}
 				/>
 			</div>
-			<div dangerouslySetInnerHTML={{ __html: body }} className={styles.body} />
+			{isEditable ?
+				<>
+					<SunEditor defaultValue={body} onChange={handleBodyChange}/>
+					<Button onClick={handleEditPost}>Save</Button>
+					<Button onClick={handleCancel}>Cancel</Button>
+				</>
+			:
+				<div dangerouslySetInnerHTML={{ __html: body }} className={styles.body} />
+			}
 			<div className={styles.footer}>
 				<div className={styles.votes}>
 					<FiThumbsUp onClick={handleVote('votesUp')} fill={votesUp?.includes(userId) ? "green" : "white"}/> 
