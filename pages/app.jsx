@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { useCookies } from 'react-cookie';
-import { Button, Card, MenuBar, Post } from '../components/uiComponents'
+import { Button, Card, DropDown, MenuBar, Post } from '../components/uiComponents'
 import { useRouter } from 'next/router'
 import dynamic from "next/dynamic";
 import 'suneditor/dist/css/suneditor.min.css';
@@ -14,13 +14,12 @@ export const App = () => {
   const router = useRouter()
 
   const [cookies] = useCookies(['codeItId'])
-  const [user, setUser] = useState({username: '', email: '', posts: []})
+  const [user, setUser] = useState({})
   const [newPost, setNewPost] = useState({isOpen: false, title: '', body: '', group: ''})
   const [posts, setPosts] = useState([])
   const [suggested, setSuggested] = useState([])
   const [groups, setGroups] = useState([])
   const [suggestedGroups, setSuggestedGroups] = useState([])
-  const [selectedGroup, setSelectedGroup] = useState()
   const [sort, setSort] = useState('hot')
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export const App = () => {
     }) 
     .then(response => response.json())
     .then(data => {
-      setUser({username: data.username, email: data.email, posts: data.posts})
+      setUser(data)
     })
 
     fetch(`http://localhost:3000/api/groups`, {
@@ -55,7 +54,7 @@ export const App = () => {
     .then(data => {
       setSuggested(data)
     })
-  }, [])
+  }, [cookies, sort])
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/group?title=${router.query.search}`, {
@@ -101,8 +100,8 @@ export const App = () => {
     setNewPost(post => ({...post, body: value}))
   }, [])
 
-  const handleGroupSelect = useCallback(({target}) => {
-    setNewPost(post => ({...post, group: target.value}))
+  const handleGroupSelect = useCallback((id) => () => {
+    setNewPost(post => ({...post, group: id}))
   }, [])
 
   const handleSubmitPost = useCallback(() => {
@@ -120,10 +119,9 @@ export const App = () => {
     }
   }, [newPost])
 
-  const handleFilterGroup = useCallback((id) => () => {
-    if (selectedGroup !== id) {
-      setSelectedGroup(id)
-      fetch(`http://localhost:3000/api/posts?groupid=${id}`, {
+  useEffect(() => {
+    if (router.query.filter) {
+      fetch(`http://localhost:3000/api/posts?groupid=${router.query.filter}`, {
         method: "GET"
       })
       .then(response => response.json())
@@ -131,7 +129,6 @@ export const App = () => {
         setPosts(data)
       })
     } else {
-      setSelectedGroup('')
       fetch(`http://localhost:3000/api/posts?type=${sort}`, {
         method: "GET"
       })
@@ -140,7 +137,7 @@ export const App = () => {
         setPosts(data)
       })
     }
-  }, [sort, selectedGroup])
+  }, [sort, router.query.filter])
 
   const handleSort = useCallback((value) => () => {
     if (sort === value) {
@@ -164,24 +161,11 @@ export const App = () => {
   }, [])
 
   const deletePost = useCallback((deletedPost) => {
-    setPosts(v => v.filter(post => post._id !== deletedPost._id))
+    setPosts(oldPosts => oldPosts.filter(oldPost => oldPost._id !== deletedPost))
   }, [])
 
   return <div className="app">
-    <MenuBar />
-    <div className="app__groups">
-      <div className="app__groups__content">
-        <h4>Following groups:</h4>
-          {groups.map((group, index) => (
-            <Card style={{cursor: 'pointer'}} onClick={handleFilterGroup(group._id)} key={`group_${index}`}>
-              <div title={group.title} className="app__groups__content__item">
-                <div className="app__groups__content__item__text" >{group.title}</div>
-                <div style={{backgroundColor: group.color}} className={`${selectedGroup === group._id && "app__groups__content__item__flag--selected"} app__groups__content__item__flag`} />
-              </div>
-            </Card>
-          ))}
-      </div>
-    </div>
+    <MenuBar username={user.username} isAdmin={user.isAdmin} groups={groups} />
     <div className="app__main">
       <div className="app__main__posts">
         {suggestedGroups.length > 0 ?
@@ -190,33 +174,37 @@ export const App = () => {
               <Card key={`groups_${index}}`}>
                 <h4>{group.title}</h4>
                 <p>{group.description}</p>
-                <Button onClick={handleSubscription(group)}>{groups.some(subscribedGroups => subscribedGroups._id === group._id) ? 'Followed': 'Follow'}</Button>
+                <Button onClick={handleSubscription(group)}>{groups.some(subscribedGroups => subscribedGroups._id === group._id) ? 'UnFollow': 'Follow'}</Button>
               </Card>
             ))}
           </div>
         :
           null
         }
-        <Card>
-          <form onFocus={openCreatePost}>
-            <input onChange={handleTitleChange} value={newPost.title}/>
+        <Card className="newPost">
+          <form className="app__main__posts__new" onFocus={openCreatePost}>
+            <img title={user.username} width="50" height="50" src={`https://avatars.dicebear.com/api/bottts/${user.username}.svg`} />
+            <div className="app__main__posts__new__header">
+            <input placeholder="Crete Post" onChange={handleTitleChange} value={newPost.title}/>
+              <DropDown target={groups?.find(group => group._id === newPost.group)?.title || "Select Group"}>
+              {groups.map((group, index) => 
+                  <div onClick={handleGroupSelect(group._id)} key={`group_option_${index}`}>
+                    {group.title}
+                  </div>
+                )}
+              </DropDown>
+            </div>
             {newPost.isOpen ? 
-              <div>
+              <div className="app__main__posts__new__content">
                 <SunEditor defaultValue={newPost.body} onChange={handleBodyChange}/>
-                <select value={newPost.group} onChange={handleGroupSelect}>
-                  <option value="">None</option>
-                  {groups.map((group, index) => 
-                    <option value={group._id} key={`group_option_${index}`}>
-                      {group.title}
-                    </option>
-                  )}
-                </select>
-                <button type="button" onClick={handleSubmitPost}>
-                  Send
-                </button>
-                <button type="button" onClick={closeCreatePost}>
-                  Close
-                </button>
+                <div className="app__main__posts__new__content__action">
+                  <Button type="button" onClick={handleSubmitPost}>
+                    Send
+                  </Button>
+                  <Button type="button" onClick={closeCreatePost}>
+                    Close
+                  </Button>
+                </div>
               </div>
             :
               null
@@ -224,21 +212,20 @@ export const App = () => {
           </form>
         </Card>
         <Card>
-          <span onClick={handleSort('hot')}>
-            Hot
-          </span>
-          |
-          <span onClick={handleSort('new')}>
-            New
-          </span>
-          |
-          <span onClick={handleSort('top')}>
-            Top
-          </span> 
-          |
-          <span onClick={handleSort('controversial')}>
-            Controversial
-          </span>
+          <div className="app__main__posts__sort">
+            <span className={sort === 'hot' ? 'active' : ''} onClick={handleSort('hot')}>
+              Hot
+            </span>
+            <span className={sort === 'new' ? 'active' : ''} onClick={handleSort('new')}>
+              New
+            </span>
+            <span className={sort === 'top' ? 'active' : ''} onClick={handleSort('top')}>
+              Top
+            </span> 
+            <span className={sort === 'controversial' ? 'active' : ''} onClick={handleSort('controversial')}>
+              Controversial
+            </span>
+          </div>
         </Card>
         {posts.map((post, index) => (
           <Post
@@ -250,6 +237,7 @@ export const App = () => {
             votesUp={post.votesUp}
             votesDown={post.votesDown}
             isUserCreator={post.createdBy === cookies.codeItId}
+            isUserAdmin={user.isAdmin}
             userId={cookies.codeItId}
             groupName={groups.find(group => group._id === post.groupId)?.title || 'group'}
             key={`post_${index}`}
@@ -264,7 +252,7 @@ export const App = () => {
           <Card key={`suggested_${index}`}>
             <h4>{group.title}</h4>
             <p>{group.description}</p>
-            <Button onClick={handleSubscription(group)}>{groups.some(subscribedGroups => subscribedGroups._id === group._id) ? 'Followed': 'Follow'}</Button>
+            <Button onClick={handleSubscription(group)}>{groups.some(subscribedGroups => subscribedGroups._id === group._id) ? 'UnFollow': 'Follow'}</Button>
           </Card>
         ))}
       </div>

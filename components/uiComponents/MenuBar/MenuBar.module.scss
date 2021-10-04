@@ -6,14 +6,25 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: white;
+  background-color: var(--card-bg);
+  border-bottom: var(--card-border);
 }
 
 .left {
   display: flex;
   align-items: center;
-  width: 170px;
-  cursor: pointer;
+  width: 250px;
+
+  img {
+    cursor: pointer;
+    filter: var(--filter);
+  }
+  span {
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 
 .right {
@@ -43,4 +54,16 @@
   cursor: pointer;
   padding: 8px 18px;
   gap: 4px;
+}
+
+@media screen and (max-width: 900px) {
+  .menuBar {
+    padding: 6px 12px;
+  }
+  .right {
+    min-width: 200px;
+  }
+  .searchIcon {
+    right: 95px;
+  }
 }

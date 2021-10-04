@@ -14,8 +14,8 @@ export default function Home() {
       </Head>
       {cookies.codeItId ?
         <App />
-        :
-      <NotLoggedIn />
+      :
+        <NotLoggedIn />
       }
     </CookiesProvider>
   )

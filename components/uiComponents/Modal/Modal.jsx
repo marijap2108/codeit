@@ -1,6 +1,7 @@
 import styles from './Modal.module.scss'
 import {Portal} from './Portal'
 import { useCallback } from 'react'
+import PropTypes from 'prop-types'
 
 export const Modal = ({
   open,
@@ -21,10 +22,12 @@ export const Modal = ({
           </div>
         </div>
       </Portal>
-    : 
+    :
       null
   )
 }
 
 Modal.propTypes = {
+  open: PropTypes.bool,
+  handleClose: PropTypes.func,
 }

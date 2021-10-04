@@ -41,13 +41,13 @@ const createGroup = async (req, res) => {
 
 const editGroup = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {id, description} = req.body
+  const {id, title, description} = req.body
 
   if (!id) {
     return res.status(300).json()
   }
 
-  const result = await db.collection("group").updateOne({'_id': new  ObjectId(id)},{$set: {description: description}})
+  const result = await db.collection("group").updateOne({'_id': new  ObjectId(id)},{$set: {title: title, description: description}})
 
   return res.status(200).json(result)
 }
@@ -73,6 +73,21 @@ const getGroup = async (req, res) => {
   return res.status(200).json(result)
 }
 
+const deleteGroup = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const {id} = req.query
+
+  if (!id) {
+    return res.status(300).json()
+  }
+
+  const result = await db.collection("group").deleteOne({ '_id': new  ObjectId(id) })
+
+  await db.collection("post").deleteMany({'groupId': id})
+
+  return res.status(200).json(result)
+}
+
 export default async (req, res) => {
   switch(req.method) {
     case "POST":
@@ -81,6 +96,8 @@ export default async (req, res) => {
       return await editGroup(req, res)
     case "GET":
       return await getGroup(req, res)
+    case "DELETE":
+      return await deleteGroup(req, res)
     default:
       return res.status(404).json()
   }

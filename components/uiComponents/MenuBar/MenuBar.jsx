@@ -2,18 +2,21 @@ import styles from './MenuBar.module.scss'
 import Image from 'next/image'
 import { useCookies } from 'react-cookie';
 import { FiSettings, FiSearch } from "react-icons/fi";
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import Router from 'next/router'
 import { DropDown, Modal } from '..';
 import { CreateGroup } from '../../pages/CreateGroup';
 
-export const MenuBar = () => {
+export const MenuBar = ({isAdmin, username, groups}) => {
 
 	const [cookies, setCookie] = useCookies(['codeItId'])
 	const [search, setSearch] = useState('')
 	const [searchStyle, setSearchStyle] = useState({maxWidth: '30%'})
-	const [username, setUsername] = useState('')
 	const [createGroup, setCreateGroup] = useState(false)
+
+	const selectedGroup = useMemo(() => {
+		return Router.query.filter
+	}, [Router.query.filter])
 
 	const onSearchChange = useCallback(({ target }) => {
 		setSearch(target.value)
@@ -70,31 +73,61 @@ export const MenuBar = () => {
 		})
 	}, [])
 
-	useEffect(() => {
-		setUsername(sessionStorage.getItem('username'))
-	}, [])
+	const handleFilterGroup = useCallback((id) => () => {
+		if (id === selectedGroup) {
+			Router.replace(`/`, undefined, { shallow: true });
+		} else {
+			Router.push({
+				pathname: '/',
+				query: id && { filter: id },
+			})
+		}
+	}, [selectedGroup])
 
+	const handleSwitchTheme = useCallback(() => {
+		document.body.classList.toggle('dark')
+	}, [])
 
 	return (
 		<>
 			<nav className={styles.menuBar}>
-				<span onClick={onLogoClick} className={styles.left}>
-					<Image src="/logo.svg" width={120} height={30} />
+				<span className={styles.left}>
+					<Image onClick={onLogoClick} src="/logo.svg" width={120} height={30} />
+					{groups ?
+						<DropDown 
+							target={groups?.find(group => group._id === selectedGroup)?.title || "All"}
+							targetClass="selectableGroups"
+						>
+							<>
+								{groups.map((group, index) => (
+									<div onClick={handleFilterGroup(group._id)} key={`group_${index}`} title={group.title}>
+										<span className="app__groups__content__item__text" >{group.title}</span>
+										<div style={{backgroundColor: group.color}} className="flag" />
+									</div>
+								))}
+							</>
+						</DropDown>
+					:
+						null
+					}
 				</span>
 				<span className={styles.right}>
 					<input placeholder="Search" className={styles.search} style={searchStyle} value={search} onChange={onSearchChange} onKeyDown={handleEnter} onFocus={handleSearchFocus} onBlur={handleSearchBlur} />
 					<FiSearch onClick={handleSearch} className={styles.searchIcon} />
 					<div onClick={handleProfileClick} className={styles.user}>
-						<img width="40" height="40" src={`https://avatars.dicebear.com/api/bottts/${username}.svg`} />
-						{username}
+						<img title={username} width="30" height="30" src={`https://avatars.dicebear.com/api/bottts/${username}.svg`} />
 					</div>
 						<DropDown
 							target={<FiSettings fontSize={18} />}
 							children={
 								<>
 									<div onClick={handleProfileClick}>Profile</div>
-									<div onClick={handleCreateGroup}>Create Group</div>
-									<div>Switch theme</div>
+									{isAdmin ?
+										<div onClick={handleCreateGroup}>Create Group</div>
+									:
+										null
+									}
+									<div onClick={handleSwitchTheme}>Switch theme</div>
 									<div onClick={handleLogOut}>Log Out</div>
 								</>
 							}

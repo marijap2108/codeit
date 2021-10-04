@@ -32,6 +32,7 @@ export const Post = ({
 	userId,
 	groupName,
 	isUserCreator,
+	isUserAdmin,
 	editPosts,
 	isSaved,
 	deletePost,
@@ -119,14 +120,14 @@ export const Post = ({
     .then(response => response.json())
     .then(data => {
 			handleCloseModal()
-      deletePost(data)
+      deletePost(data._id)
     })
 	}, [])
 
 	const handleDeletePostModal = useCallback(() => {
 		setIsModalOpen(true)
 		setModalChildren(
-			<form>
+			<form className="deletePost">
 				<h3>Delete Post</h3>
 				<Button onClick={handleDeletePost}>Yes</Button>
 				<Button onClick={handleCloseModal}>No</Button>
@@ -147,8 +148,20 @@ export const Post = ({
     })
   }, [])
 
+	const handleSavePost = useCallback(() => {
+		fetch(`http://localhost:3000/api/user`, {
+			method: "PUT",
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({postId: postId})
+		})    
+		.then(response => response.json())
+    .then(data => {
+			setSaved(data.saved)
+    })
+	}, [])
+
 	const dropDownChildren = useMemo(() => {
-		return isUserCreator ?
+		return isUserCreator || isUserAdmin ?
 			<>
 				<div onClick={handleEdit}>
 					Edit
@@ -159,7 +172,7 @@ export const Post = ({
 			</>
 			:
 			<>
-				<div>
+				<div onClick={handleSavePost}>
 					Save
 				</div>
 				<div>
@@ -177,18 +190,6 @@ export const Post = ({
 		.then(response => response.json())
     .then(data => {
 			editPosts(data)
-    })
-	}, [])
-
-	const handleSavePost = useCallback(() => {
-		fetch(`http://localhost:3000/api/user`, {
-			method: "PUT",
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({postId: postId})
-		})    
-		.then(response => response.json())
-    .then(data => {
-			setSaved(data.saved)
     })
 	}, [])
 
@@ -219,7 +220,7 @@ export const Post = ({
 	}, [newBody])
 
   return(
-    <Card>
+    <Card className="post">
 			<div className={styles.header}>
 				<img width="24" height="24" src={`https://avatars.dicebear.com/api/bottts/${creatorName}.svg`} />
 				<div className={styles.text}>
@@ -234,8 +235,10 @@ export const Post = ({
 			{isEditable ?
 				<>
 					<SunEditor defaultValue={body} onChange={handleBodyChange}/>
-					<Button onClick={handleEditPost}>Save</Button>
-					<Button onClick={handleCancel}>Cancel</Button>
+					<div className={styles.actions}>
+						<Button onClick={handleEditPost}>Save</Button>
+						<Button onClick={handleCancel}>Cancel</Button>
+					</div>
 				</>
 			:
 				<div dangerouslySetInnerHTML={{ __html: body }} className={styles.body} />

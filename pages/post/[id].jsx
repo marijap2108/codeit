@@ -27,9 +27,9 @@ const Post = ({initialPost}) => {
     }) 
     .then(response => response.json())
     .then(data => {
-      setUser({username: data.username, email: data.email, posts: data.posts})
+      setUser(data)
     })
-  }, [])
+  }, [cookies])
 
   const editPosts = useCallback((newPost) => {
     setPost(newPost)
@@ -42,24 +42,27 @@ const Post = ({initialPost}) => {
   }, [])
 
   return (
-    <div>
-      <MenuBar />
-      <PostCard
-        postId={post._id}
-        title={post.title}
-        creatorName={post.creatorName}
-        createdOn={post.createdOn}
-        body={post.body}
-        votesUp={post.votesUp}
-        votesDown={post.votesDown}
-        isUserCreator={post.createdBy === cookies.codeItId}
-        userId={cookies.codeItId}
-        isSaved={user.posts?.includes(post._id)}
-        isEditable={router.query.edit}
-        editPosts={editPosts}
-        deletePost={deletePost}
-      />
-    </div>
+    <>
+      <MenuBar isAdmin={user.isAdmin} username={user.username} />
+      <div className="postPage">
+        <PostCard
+          postId={post._id}
+          title={post.title}
+          creatorName={post.creatorName}
+          createdOn={post.createdOn}
+          body={post.body}
+          votesUp={post.votesUp}
+          votesDown={post.votesDown}
+          isUserCreator={post.createdBy === cookies.codeItId}
+          isUserAdmin={user.isAdmin}
+          userId={cookies.codeItId}
+          isSaved={user.posts?.includes(post._id)}
+          isEditable={router.query.edit}
+          editPosts={editPosts}
+          deletePost={deletePost}
+        />
+      </div>
+    </>
   )
 }
 

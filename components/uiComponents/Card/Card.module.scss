@@ -1,7 +1,13 @@
 .card {
   background-color: var(--card-bg);
   border-radius: var(--card-radius);
+  border: var(--card-border);
   box-shadow: var(--card-shadow);
   padding: var(--card-padding);
   overflow: hidden;
+  transition-duration: 0.3s;
+
+  .item {
+    cursor: pointer;
+  }
 }

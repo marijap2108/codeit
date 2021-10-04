@@ -14,7 +14,8 @@ const createUser = async (req, res) => {
     email: email,
     password: password,
     groups: [],
-    posts: []
+    posts: [],
+    isAdmin: false
   }
 
   const result = await db.collection("user").insertOne(newUser)
@@ -70,17 +71,41 @@ export const handleGroup = async (follow, unFollow, cookies, res) => {
 
 }
 
+const promoteUser = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const {promote} = req.query
+
+  if (!promote) {
+    return res.status(300).json()
+  }
+
+  const result = await db.collection("user").updateOne({'_id': new  ObjectId(promote)},{$set: {isAdmin: true}})
+
+  return res.status(200).json(result)
+}
+
 const editUser = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {id, password} = req.body
+  const {id} = req.query
+  const {password, oldPassword, username, email} = req.body
 
   if (!id) {
     return res.status(300).json()
   }
 
-  const result = await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {password: password}})
+  if (password) {
+    await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {password: password}})
+  }
 
-  return res.status(200).json(result)
+  if (username) {
+    await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {username: username}})
+  }
+
+  if (email) {
+    await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {email: email}})
+  }
+
+  return res.status(200).json()
 }
 
 const getUser = async (req, res) => {
@@ -96,7 +121,7 @@ const getUser = async (req, res) => {
   if (id) {
     result = await db.collection("user").findOne({ '_id': new ObjectId(id)})
     if (result.groups) {
-      result.groups = await db.collection("group").find({_id: result.groups.map(v => new ObjectId(v))})
+      result.groups = await db.collection("group").find({_id: { $in: result.groups.map(group => new ObjectId(group)) }}).toArray()
     }
     return res.status(200).json(result)
 
@@ -104,7 +129,22 @@ const getUser = async (req, res) => {
     result = await db.collection("user").findOne({ username: username, password: password })
   }
 
-  return res.status(200).json({id: result._id, username: result.username, email: result.email })
+  return res.status(200).json(result)
+}
+
+const deleteUser = async (req, res) => {
+  const {db} = await connectToDatabase()
+  const {id} = req.query
+
+  if (!id) {
+    return res.status(300).json()
+  }
+
+  const result = await db.collection("user").deleteOne({ '_id': new  ObjectId(id) })
+
+  await db.collection("post").deleteMany({'createdBy': id})
+
+  return res.status(200).json(result)
 }
 
 export default async (req, res) => {
@@ -118,9 +158,14 @@ export default async (req, res) => {
       if (req.query.follow || req.query.unfollow) {
         return await handleGroup(req.query.follow, req.query.unfollow, req.cookies, res)
       }
+      if (req.query.promote) {
+        return await promoteUser(req, res)
+      }
       return await editUser(req, res)
     case "GET":
       return await getUser(req, res)
+    case "DELETE":
+      return await deleteUser(req, res)
     default:
       return res.status(404).json()
   }

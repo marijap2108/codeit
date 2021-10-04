@@ -6,6 +6,7 @@ import style from './DropDown.module.scss'
 
 export const DropDown = ({
   target,
+  targetClass,
   children
 }) => {
   const [referenceElement, setReferenceElement] = useState(null);
@@ -19,12 +20,12 @@ export const DropDown = ({
 
   return (
     <>
-    <span className={style.target} onClick={handleIsOpen} ref={setReferenceElement}>
+    <span className={`${style.target} ${targetClass}`} onClick={handleIsOpen} ref={setReferenceElement}>
       {target}
     {isOpen ?
       <div className={style.overlay}>
         <div ref={setPopperElement} style={styles.popper} {...attributes.popper}>
-          <Card>
+          <Card className="list">
             {children}
           </Card>
         </div>
@@ -32,8 +33,7 @@ export const DropDown = ({
       :
       null
     }
-        </span>
-
+    </span>
   </>
   )
 }

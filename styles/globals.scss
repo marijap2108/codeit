@@ -1,22 +1,44 @@
 :root {
-  --text-color: white;
-  --color-primary: #ff8038;
+  --text-color: black;
+  --color-primary: #0079d3;
   --color-secondary: #265f7b;
   --color-primary-darker: #d66d30;
   --color-secondary-darker: #1b4458;
-  --color-bg: whitesmoke;
+  --color-hover-icon: #1a1a1b1a;
+  --color-bg: #dae0e6;
+  --color-action: #878a8c;
   --card-bg: white;
-  --card-radius: 15px;
-  --card-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  --filter: invert(1);
+  --card-radius: 4px;
+  --card-border: 1px solid #ccc;
+  --card-shadow: rgba(0, 0, 0, 0.1) 0px 3px 5px 0px;
   --card-padding: 12px 14px;
-  --input-radius: 8px;
-  --input-border: 1px black solid;
-  --input-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
-    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  --card-border-hover-color: rgba(0, 0, 0, 0.5);
+  --input-radius: 4px;
+  --input-border: 1px rgba(0, 0, 0, 0.2) solid;
+  --input-shadow: rgba(50, 50, 93, 0.1) 2px 3px 12px -6px,
+    rgba(0, 0, 0, 0.2) 1px 3px 4px -2px;
+  --post-shadow: 0px 0px 10px 15px white;
+}
+
+.dark {
+  --text-color: #d7dadc;
+  --color-primary: #ff4500;
+  --filter: none;
+  --color-hover-icon: #3a3a3d;
+  --color-bg: #030303;
+  --card-bg: #1a1a1b;
+  --color-action: #818384;
+  --card-border: 1px solid #343536;
+  --card-border-hover-color: #818384;
+  --input-bg: #272729;
+  --post-shadow: 0px 0px 10px 15px #1a1a1b;
 }
 
 html,
 body {
+  min-height: 100vh;
+  color: var(--text-color);
   padding: 0;
   margin: 0;
   background-color: var(--color-bg);
@@ -24,11 +46,67 @@ body {
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
+.sun-editor {
+  border: var(--card-border) !important;
+}
+
+.sun-editor .se-toolbar {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  outline: var(--card-border) !important;
+}
+
+.sun-editor .se-btn-module-border {
+  border: var(--card-border) !important;
+}
+
+.sun-editor button {
+  color: var(--text-color) !important;
+}
+
+.sun-editor button.active {
+  color: var(--color-primary) !important;
+}
+
+.sun-editor .se-btn:enabled:focus,
+.sun-editor .se-btn:enabled:hover {
+  background-color: var(--color-hover-icon) !important;
+}
+
+.sun-editor .se-btn:enabled:active {
+  box-shadow: none !important;
+}
+
+.sun-editor-editable {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+}
+.sun-editor .se-resizing-bar {
+  min-height: 2px !important;
+  max-height: 2px !important;
+  overflow: hidden !important;
+}
+
 input {
-  border-radius: 8px;
+  border-radius: var(--input-radius);
   border: var(--input-border);
   transition-duration: 0.3s;
   padding: 4px 8px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--input-shadow);
+  }
+}
+
+textarea {
+  border: var(--input-border);
+  border-radius: var(--input-radius);
+  transition-duration: 0.3s;
+  background-color: var(--input-bg);
+  color: var(--text-color);
 
   &:focus-visible {
     outline: none;
@@ -40,74 +118,47 @@ h4 {
   margin: 8px 0;
 }
 
+.post {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  &:hover {
+    border-color: var(--card-border-hover-color);
+  }
+}
+
+.list {
+  padding: 2px 0 !important;
+  font-size: 14px;
+  div {
+    padding: 2px 8px;
+    margin: 2px 0;
+    cursor: pointer;
+    transition-duration: 0.3s;
+    display: flex;
+    justify-content: space-between;
+
+    &:hover {
+      background-color: var(--color-hover-icon);
+    }
+  }
+}
+
 .app {
   position: relative;
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 1fr;
   grid-template-rows: 64px auto;
   grid-template-areas:
-    "menuBar menuBar"
-    "groups main";
-  min-height: 100vh;
-
-  &__groups {
-    grid-area: groups;
-    padding: 0 24px;
-    background-color: white;
-
-    &__content {
-      position: sticky;
-      top: 70px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-
-      &__item {
-        position: relative;
-
-        &__text {
-          width: 80%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        &__flag {
-          position: absolute;
-          top: -12px;
-          right: -14px;
-          bottom: -12px;
-          left: 80%;
-          clip-path: polygon(
-            75% 0%,
-            100% 50%,
-            75% 100%,
-            0% 100%,
-            25% 50%,
-            0% 0%
-          );
-          transition-duration: 0.3s;
-
-          &--selected {
-            clip-path: polygon(
-              100% 0,
-              100% 50%,
-              100% 100%,
-              0% 100%,
-              0 50%,
-              0% 0%
-            );
-          }
-        }
-      }
-    }
-  }
+    "menuBar"
+    "main";
 
   &__main {
     grid-area: main;
     display: flex;
     overflow: hidden;
     padding-top: 24px;
+    justify-content: center;
 
     &__posts {
       padding: 0 20px;
@@ -116,6 +167,90 @@ h4 {
       flex-direction: column;
       gap: 24px;
       width: calc(100vw - 600px);
+      max-width: 600px;
+
+      .newPost {
+        overflow: revert;
+      }
+
+      &__new {
+        position: relative;
+
+        img {
+          position: absolute;
+          left: 0;
+          top: -20px;
+        }
+
+        &__header {
+          display: flex;
+
+          input {
+            margin-left: 60px;
+            height: 20px;
+            width: calc(100% - 80px);
+          }
+
+          span {
+            width: 120px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin-left: 12px;
+          }
+        }
+
+        &__content {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 24px;
+
+          &__action {
+            display: flex;
+            justify-content: space-between;
+
+            button {
+              width: calc(50% - 12px);
+            }
+          }
+        }
+      }
+
+      &__sort {
+        font-weight: bold;
+        color: var(--color-action);
+
+        span {
+          padding: 0 4px 4px 4px;
+          margin: 0 2px;
+          cursor: pointer;
+          position: relative;
+          user-select: none;
+          border-radius: var(--card-radius);
+
+          &::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            height: 2px;
+            width: 0;
+            left: 0;
+            transition-duration: 0.3s;
+          }
+
+          &:hover {
+            background-color: var(--color-hover-icon);
+          }
+        }
+
+        .active {
+          &::after {
+            width: 100%;
+            background-color: #0079d3;
+          }
+        }
+      }
 
       &__suggested {
         display: flex;
@@ -132,4 +267,201 @@ h4 {
       gap: 24px;
     }
   }
+}
+
+.selectableGroups {
+  flex-grow: 1;
+  padding: 2px 8px;
+  border: var(--input-border);
+  border-radius: var(--input-radius);
+}
+
+@media screen and (max-width: 900px) {
+  .app__main__suggested {
+    display: none;
+  }
+
+  .userPage {
+    flex-direction: column;
+
+    &__left,
+    &__right {
+      width: auto !important;
+    }
+  }
+  .groupModal {
+    min-width: 250px !important;
+    max-width: 90vw;
+
+    textarea {
+      min-width: 150px !important;
+    }
+  }
+}
+
+.flag {
+  clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+}
+
+.userPage {
+  display: flex;
+
+  &__left {
+    width: 20%;
+    min-width: 300px;
+    padding: 12px;
+
+    .profile {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+
+      img {
+        width: 50%;
+        height: auto;
+      }
+
+      svg {
+        padding: 0 4px;
+        cursor: pointer;
+      }
+
+      hr {
+        width: 100%;
+      }
+
+      &__data {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        span:last-child {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+
+      &__actions {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      &__groups {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 6px 0;
+
+        &__group {
+          display: flex;
+          justify-content: space-between;
+          span:first-child {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+
+      &__adminPanel {
+        margin: 6px 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  }
+
+  &__right {
+    width: 80%;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    &__filter {
+      font-weight: bold;
+      color: var(--color-action);
+      padding: 0 4px 4px 4px;
+      margin: 0 2px;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      border-radius: var(--card-radius);
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        height: 2px;
+        width: 0;
+        left: 0;
+        transition-duration: 0.3s;
+      }
+
+      &:hover {
+        background-color: var(--color-hover-icon);
+      }
+    }
+    .active {
+      &::after {
+        width: 100%;
+        background-color: #0079d3;
+      }
+    }
+  }
+}
+
+.postPage {
+  margin: 24px 12px;
+}
+
+.searchUsers {
+  padding: 24px;
+  background-color: var(--card-bg);
+
+  &__search {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+.groupModal {
+  padding: 24px;
+  background-color: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 400px;
+
+  h2 {
+    margin: 12px 0;
+  }
+
+  textarea {
+    min-width: 400px;
+    min-height: 50px;
+    max-width: 80vw;
+    max-height: 100px;
+    margin: 2px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+.deletePost {
+  background-color: var(--card-bg);
+  padding: 12px 24px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
