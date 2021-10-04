@@ -1,4 +1,5 @@
 import {connectToDatabase} from "../../utils/mongodb"
+import { getLoggedUser } from "../../utils/getLoggedUser";
 import { ObjectId } from 'mongodb';
 
 const createUser = async (req, res) => {
@@ -6,7 +7,7 @@ const createUser = async (req, res) => {
   const {username, email, password} = req.body
 
   if (!username || !email || !password) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
   const newUser = {
@@ -18,9 +19,12 @@ const createUser = async (req, res) => {
     isAdmin: false
   }
 
-  const result = await db.collection("user").insertOne(newUser)
-
-  return res.status(200).json({id: result.insertedId, username, email})
+  try {
+    const result = await db.collection("user").insertOne(newUser)
+    return res.status(200).json({id: result.insertedId})
+  } catch (e) {
+    throw (`Probem with user create, ${e}`)
+  }
 }
 
 const handleSavePost = async (req, res) => {
@@ -52,7 +56,7 @@ export const handleGroup = async (follow, unFollow, cookies, res) => {
 
   if (follow) {
     if (groups.includes(follow)) {
-      return res.status(300).json()
+      return res.status(400).json()
     }
     groups.push(follow)
 
@@ -75,13 +79,22 @@ const promoteUser = async (req, res) => {
   const {db} = await connectToDatabase()
   const {promote} = req.query
 
+  const user = await getLoggedUser(req)
+
   if (!promote) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  const result = await db.collection("user").updateOne({'_id': new  ObjectId(promote)},{$set: {isAdmin: true}})
+  if (!user.isAdmin) {
+    return res.status(403).json()
+  }
 
-  return res.status(200).json(result)
+  try {
+    await db.collection("user").updateOne({'_id': new  ObjectId(promote)},{$set: {isAdmin: true}})
+    return res.status(200).json()
+  } catch (e) {
+    throw (`Progem with user promote, ${e}`)
+  }
 }
 
 const editUser = async (req, res) => {
@@ -89,21 +102,32 @@ const editUser = async (req, res) => {
   const {id} = req.query
   const {password, oldPassword, username, email} = req.body
 
+  const user = await getLoggedUser(req)
+
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  if (password) {
-    await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {password: password}})
+  if (user._id !== id && !user.isAdmin) {
+    return res.status(403).json()
+  }
+
+  const newUser = await db.collection('user').findOne({'_id': new  ObjectId(id)})
+
+  if (user._id === id) {
+    if (password) {
+      newUser.password = password
+    }
+    if (email) {
+      newUser.email = email
+    }
   }
 
   if (username) {
-    await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {username: username}})
+    newUser.username = username
   }
 
-  if (email) {
-    await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: {email: email}})
-  }
+  await db.collection("user").updateOne({'_id': new  ObjectId(id)},{$set: newUser})
 
   return res.status(200).json()
 }
@@ -112,22 +136,26 @@ const getUser = async (req, res) => {
   const {db} = await connectToDatabase()
   const {username, password, id} = req.query
 
-  if ((!username || !password) && !id) {
-    return res.status(300).json()
+  const user = await getLoggedUser(req)
+
+  if (user) {
+    user.groups = await db.collection("group").find({_id: { $in: user.groups.map(group => new ObjectId(group)) }}).toArray()
+    return res.status(200).json(user)
   }
 
-  let result;
+  if ((!username || !password) && !id) {
+    return res.status(400).json()
+  }
 
   if (id) {
-    result = await db.collection("user").findOne({ '_id': new ObjectId(id)})
-    if (result.groups) {
-      result.groups = await db.collection("group").find({_id: { $in: result.groups.map(group => new ObjectId(group)) }}).toArray()
-    }
+    const result = await db.collection("user").findOne({ _id: new ObjectId(id) })
+    result.groups = await db.collection("group").find({_id: { $in: result.groups.map(group => new ObjectId(group)) }}).toArray()
+  
     return res.status(200).json(result)
-
-  } else {
-    result = await db.collection("user").findOne({ username: username, password: password })
   }
+
+  const result = await db.collection("user").findOne({ username: username, password: password })
+  result.groups = await db.collection("group").find({_id: { $in: result.groups.map(group => new ObjectId(group)) }}).toArray()
 
   return res.status(200).json(result)
 }
@@ -137,7 +165,7 @@ const deleteUser = async (req, res) => {
   const {id} = req.query
 
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
   const result = await db.collection("user").deleteOne({ '_id': new  ObjectId(id) })

@@ -2,7 +2,7 @@ import styles from './MenuBar.module.scss'
 import Image from 'next/image'
 import { useCookies } from 'react-cookie';
 import { FiSettings, FiSearch } from "react-icons/fi";
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import Router from 'next/router'
 import { DropDown, Modal } from '..';
 import { CreateGroup } from '../../pages/CreateGroup';
@@ -13,6 +13,12 @@ export const MenuBar = ({isAdmin, username, groups}) => {
 	const [search, setSearch] = useState('')
 	const [searchStyle, setSearchStyle] = useState({maxWidth: '30%'})
 	const [createGroup, setCreateGroup] = useState(false)
+
+	useEffect(() => {
+		if (localStorage.getItem('theme') === 'dark') {
+		  document.body.classList.add('dark')
+		}
+	  }, [])
 
 	const selectedGroup = useMemo(() => {
 		return Router.query.filter
@@ -85,6 +91,11 @@ export const MenuBar = ({isAdmin, username, groups}) => {
 	}, [selectedGroup])
 
 	const handleSwitchTheme = useCallback(() => {
+		if (document.body.classList.contains('dark')) {
+			localStorage.setItem('theme', 'light')
+		} else {
+			localStorage.setItem('theme', 'dark')
+		}
 		document.body.classList.toggle('dark')
 	}, [])
 

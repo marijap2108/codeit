@@ -57,7 +57,7 @@ export const App = () => {
   }, [cookies, sort])
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/group?title=${router.query.search}`, {
+    fetch(`http://localhost:3000/api/groups?title=${router.query.search}`, {
       method: "GET"
     }) 
     .then(response => response.json())

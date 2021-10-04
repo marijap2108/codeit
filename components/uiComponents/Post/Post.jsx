@@ -4,7 +4,6 @@ import { FiThumbsUp, FiThumbsDown, FiMoreHorizontal, FiShare2, FiSave, FiMessage
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EmailShareButton,
-  FacebookShareButton,
   LinkedinShareButton,
   RedditShareButton,
   TelegramShareButton,
@@ -254,13 +253,11 @@ export const Post = ({
 						target={<><FiShare2 /> Share</>}
 						children={
 							<>
-								<EmailShareButton url={`${url}post/${postId}`}> Share on email </EmailShareButton> <br />
-								<FacebookShareButton url={`${url}post/${postId}`}> Share on facebook </FacebookShareButton> <br />
-								<LinkedinShareButton url={`${url}post/${postId}`}> Share on linkedIn </LinkedinShareButton> <br />
-								<RedditShareButton url={`${url}post/${postId}`}> Share on reddit </RedditShareButton> <br />
-								<TelegramShareButton url={`${url}post/${postId}`}> Share on telegram </TelegramShareButton> <br />
-								<TwitterShareButton url={`${url}post/${postId}`}> Share on twitter </TwitterShareButton> <br />
-								<WorkplaceShareButton url={`${url}post/${postId}`}> Share on workplace </WorkplaceShareButton> <br />
+								<div><EmailShareButton url={`${url}post/${postId}`}> Share on email </EmailShareButton></div>
+								<div><RedditShareButton url={`${url}post/${postId}`}> Share on reddit </RedditShareButton></div>
+								<div><TelegramShareButton url={`${url}post/${postId}`}> Share on telegram </TelegramShareButton></div>
+								<div><TwitterShareButton url={`${url}post/${postId}`}> Share on twitter </TwitterShareButton></div>
+								<div><WorkplaceShareButton url={`${url}post/${postId}`}> Share on workplace </WorkplaceShareButton></div>
 							</>
 						}
 					/>

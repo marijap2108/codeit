@@ -6,6 +6,7 @@ import { App } from './app'
 
 export default function Home() {
   const [cookies] = useCookies(['codeItId'])
+
   return (
     <CookiesProvider>
       <Head>

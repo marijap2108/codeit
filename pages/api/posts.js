@@ -1,43 +1,7 @@
 import { connectToDatabase } from "../../utils/mongodb"
 import { ObjectId } from 'mongodb';
+import { getLoggedUser } from "../../utils/getLoggedUser";
 import { handleSort } from "../../utils/handleSort";
-
-const createPost = async (req, res) => {
-  const {db} = await connectToDatabase()
-  const {title, body, group} = req.body
-  const cookies = req.cookies
-
-  if (!title || !body || !group) {
-    return res.status(300).json()
-  }
-
-  const newPost = {
-    title: title,
-    body: body,
-    groupId: group,
-    createdBy: cookies.codeItId,
-    createdOn: Date.now(),
-    votesUp: [cookies.codeItId],
-    votesDown: []
-  }
-
-  await db.collection("post").insertOne(newPost)
-
-  return res.status(200).json({...newPost})
-}
-
-const editPost = async (req, res) => {
-  const {db} = await connectToDatabase()
-  const {id, body} = req.body
-
-  if (!id) {
-    return res.status(300).json()
-  }
-
-  const result = await db.collection("post").updateOne({'_id': new  ObjectId(id)},{$set: {body: body}})
-
-  return res.status(200).json(result)
-}
 
 const getHotPosts = async (req, res) => {
   const {db} = await connectToDatabase()
@@ -45,7 +9,7 @@ const getHotPosts = async (req, res) => {
   const {codeItId} = req.cookies
 
   if (!type) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
   const {groups} = await db.collection("user").findOne({ _id : new ObjectId(codeItId) })
@@ -73,7 +37,7 @@ const getSuggestedPosts = async (req, res) => {
   const {type} = req.query
 
   if (!type) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
   const result = await db.collection("post").find().sort({datefield: -1}).limit(3).toArray()
@@ -101,10 +65,6 @@ const getPostsByUser = async (req, res) => {
 
 export default async (req, res) => {
   switch(req.method) {
-    case "POST":
-      return await createPost(req, res)
-    case "PUT":
-      return await editPost(req, res)
     case "GET":
       const {type, groupid, userid} = req.query
       if (type) {

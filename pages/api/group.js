@@ -1,40 +1,37 @@
 import { connectToDatabase } from "../../utils/mongodb"
 import { ObjectId } from 'mongodb';
-import { handleGroup } from "./user";
+import { getLoggedUser } from "../../utils/getLoggedUser";
+import { generateColor } from "../../utils/generateColor";
 
 const createGroup = async (req, res) => {
   const {db} = await connectToDatabase()
   const {title, description} = req.body
-  const cookies = req.cookies
+
+  const user = await getLoggedUser(req)
 
   if (!title || !description) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  let hash = 0
-  let color = '#';
-
-  for (var i = 0; i < title.length; i++) {
-    hash = title.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash;
+  if (!user.isAdmin) {
+    return res.status(403).json()
   }
 
-  for (var i = 0; i < 3; i++) {
-      var value = (hash >> (i * 8)) & 255;
-      color += ('00' + value.toString(16)).substr(-2);
-  }
+  const color = generateColor(title)
 
   const newGroup = {
     title: title,
     description: description,
     color: color,
-    createdBy: cookies.codeItId,
+    createdBy: user._id,
     createdOn: Date.now()
   }
 
   const result = await db.collection("group").insertOne(newGroup)
 
-  await handleGroup(result.insertedId.toString(), null, cookies, res)
+  user.groups.push(result.insertedId)
+
+  await db.collection("user").updateOne({'_id': new  ObjectId(user._id)},{$set: {groups: user.groups}})
 
   return res.status(200).json({...newGroup, id: result.insertedId})
 }
@@ -44,33 +41,35 @@ const editGroup = async (req, res) => {
   const {id, title, description} = req.body
 
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  const result = await db.collection("group").updateOne({'_id': new  ObjectId(id)},{$set: {title: title, description: description}})
+  if (!description && !title) {
+    return res.status(400).json()
+  }
 
-  return res.status(200).json(result)
+  try {
+    const result = await db.collection("group").updateOne({'_id': new  ObjectId(id)},{$set: {title: title, description: description}})
+    return res.status(200).json(result)
+  } catch (e) {
+    throw (`Probelm with group edit, ${e}`)
+  }
 }
 
 const getGroup = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {id, title} = req.query
+  const {id} = req.query
 
-  if (!id && !title) {
-    return res.status(300).json()
+  if (!id) {
+    return res.status(400).json()
   }
 
-  let result;
-
-  if (id) {
-    result = await db.collection("group").findOne({ '_id': new  ObjectId(id) })
-    result = [result]
+  try {
+    const result = await db.collection("group").findOne({ '_id': new  ObjectId(id) })
+    return res.status(200).json(result)
+  } catch (e) {
+    throw (`Probelm with getting group, ${e}`)
   }
-  if (title) {
-    result = await db.collection("group").find({title: new RegExp(title, 'i')}).toArray()
-  }
-
-  return res.status(200).json(result)
 }
 
 const deleteGroup = async (req, res) => {
@@ -78,7 +77,17 @@ const deleteGroup = async (req, res) => {
   const {id} = req.query
 
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
+  }
+
+  const user = await getLoggedUser(req)
+
+  if (!user.isAdmin) {
+    const group = await db.collection('group').findOne({'_id': new ObjectId(id)})
+
+    if (group.createdBy !== user._id) {
+      return res.status(403).json()
+    }
   }
 
   const result = await db.collection("group").deleteOne({ '_id': new  ObjectId(id) })

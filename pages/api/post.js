@@ -1,43 +1,64 @@
 import { connectToDatabase } from "../../utils/mongodb"
 import { ObjectId } from 'mongodb';
+import { getLoggedUser } from "../../utils/getLoggedUser";
 
 const createPost = async (req, res) => {
   const {db} = await connectToDatabase()
   const {title, body, group} = req.body
-  const cookies = req.cookies
+
+  const user = await getLoggedUser(req)
 
   if (!title || !body || !group) {
-    return res.status(300).json()
+    return res.status(400).json()
+  }
+
+  if (!user.groups.includes(group)) {
+    return res.status(403).json()
   }
 
   const newPost = {
     title: title,
     body: body,
     groupId: group,
-    createdBy: cookies.codeItId,
+    createdBy: user._id,
     createdOn: Date.now(),
-    votesUp: [cookies.codeItId],
+    votesUp: [user._id],
     votesDown: []
   }
 
-  await db.collection("post").insertOne(newPost)
-
-  return res.status(200).json({...newPost})
+  try {
+    await db.collection("post").insertOne(newPost)
+  } catch (e) {
+    throw (`Probem with post creation, ${e}`)
+  } finally {
+    return res.status(200).json({...newPost})
+  }
 }
 
 const editPost = async (req, res) => {
   const {db} = await connectToDatabase()
   const {id, body} = req.body
 
+  const user = await getLoggedUser(req)
+
   if (!id || !body) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  await db.collection("post").updateOne({'_id': new  ObjectId(id)},{$set: {body: body}})
+  if (!user.isAdmin) {
+    const post = await db.collection('post').findOne({'_id': new ObjectId(id)})
 
-  const result = await db.collection("post").findOne({'_id': new  ObjectId(id)})
+    if (post.createdBy !== user._id) {
+      return res.status(403).json()
+    }
+  }
 
-  return res.status(200).json(result)
+  try {
+    const result = await db.collection("post").updateOne({'_id': new  ObjectId(id)},{$set: {body: body}})
+    return res.status(200).json(result)
+  } catch (e) {
+    throw (`Problem with post update, ${e}`)
+  }
 }
 
 const handleVote = async (req, res) => {
@@ -78,7 +99,7 @@ const getPost = async (req, res) => {
   const {id} = req.query
 
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
   const result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
@@ -89,21 +110,24 @@ const getPost = async (req, res) => {
 const deletePost = async (req, res) => {
   const {db} = await connectToDatabase()
   const {id} = req.query
-  const cookies = req.cookies
+
+  const user = await getLoggedUser(req)
 
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  const result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
+  if (!user.isAdmin) {
+    const post = await db.collection('post').findOne({'_id': new ObjectId(id)})
 
-  if (result.createdBy === cookies.codeItId) {
-    await db.collection("post").deleteOne({ '_id': new  ObjectId(id) })
-
-    return res.status(200).json(result)
+    if (post.createdBy !== user._id) {
+      return res.status(403).json()
+    }
   }
 
-  return res.status(400).json(result)
+  await db.collection("post").deleteOne({ '_id': new  ObjectId(id) })
+
+  return res.status(200).json(result)
 }
 
 export default async (req, res) => {
