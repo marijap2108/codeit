@@ -48,7 +48,7 @@ const Post = ({initialPost}) => {
         <PostCard
           postId={post._id}
           title={post.title}
-          creatorName={post.creatorName}
+          creatorName={post.creatorUsername}
           createdOn={post.createdOn}
           body={post.body}
           votesUp={post.votesUp}
@@ -56,6 +56,7 @@ const Post = ({initialPost}) => {
           isUserCreator={post.createdBy === cookies.codeItId}
           isUserAdmin={user.isAdmin}
           userId={cookies.codeItId}
+          groupName={post.groupName}
           isSaved={user.posts?.includes(post._id)}
           isEditable={router.query.edit}
           editPosts={editPosts}

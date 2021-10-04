@@ -21,6 +21,9 @@ export const App = () => {
   const [groups, setGroups] = useState([])
   const [suggestedGroups, setSuggestedGroups] = useState([])
   const [sort, setSort] = useState('hot')
+  const [users, setUsers] = useState({})
+  const [skip, setStep] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/user?id=${cookies.codeItId}`, {
@@ -29,6 +32,7 @@ export const App = () => {
     .then(response => response.json())
     .then(data => {
       setUser(data)
+      setUsers(oldUsers => ({...oldUsers, [data._id]: data.username}))
     })
 
     fetch(`http://localhost:3000/api/groups`, {
@@ -54,7 +58,7 @@ export const App = () => {
     .then(data => {
       setSuggested(data)
     })
-  }, [cookies, sort])
+  }, [cookies])
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/groups?title=${router.query.search}`, {
@@ -65,6 +69,27 @@ export const App = () => {
       setSuggestedGroups(data)
     })
   }, [router.query.search])
+
+  const handleUsers = useCallback(() => {
+    const newUsers = [];
+    posts.map(({createdBy}) => {
+      if (!users[createdBy] && !newUsers.includes(createdBy)) {
+        newUsers.push(createdBy)
+      }
+    })
+
+    if (newUsers.length > 0) {
+      newUsers.map(id => (
+        fetch(`http://localhost:3000/api/user?id=${id}`, {
+          method: "GET"
+        }) 
+        .then(response => response.json())
+        .then(data => {
+          setUsers(oldUsers => ({...oldUsers, [data._id]: data.username}))
+        })
+      ))
+    }
+  }, [posts, users])
 
   const handleSubscription = useCallback((v) => ({target}) => {
     if (target.innerHTML === 'Follow') {
@@ -121,23 +146,37 @@ export const App = () => {
 
   useEffect(() => {
     if (router.query.filter) {
-      fetch(`http://localhost:3000/api/posts?groupid=${router.query.filter}`, {
+      fetch(`http://localhost:3000/api/posts?type=${sort}&groupid=${router.query.filter}&skip=${skip}`, {
         method: "GET"
       })
       .then(response => response.json())
       .then(data => {
-        setPosts(data)
+        setPosts(oldPosts => ([...oldPosts, ...data]))
+        if (data.length > 4) {
+          setLoading(false)
+        }
       })
     } else {
-      fetch(`http://localhost:3000/api/posts?type=${sort}`, {
+      fetch(`http://localhost:3000/api/posts?type=${sort}&skip=${skip}`, {
         method: "GET"
       })
       .then(response => response.json())
       .then(data => {
-        setPosts(data)
+        setPosts(oldPosts => ([...oldPosts, ...data]))
+        if (data.length > 3) {
+          setLoading(false)
+        }
       })
     }
-  }, [sort, router.query.filter])
+  }, [sort, router.query.filter, skip])
+
+  useEffect(() => {
+    setStep(step => step + 5)
+  }, [loading])
+
+  useEffect(() => {
+    setPosts([])
+  }, [router.query.filter])
 
   const handleSort = useCallback((value) => () => {
     if (sort === value) {
@@ -145,15 +184,6 @@ export const App = () => {
     } 
 
     setSort(value)
-
-    fetch(`http://localhost:3000/api/posts?type=${value}`, {
-      method: "GET"
-    })
-    .then(response => response.json())
-    .then(data => {
-      setPosts(data)
-    })
-
   }, [sort])
 
   const editPosts = useCallback((newPost) => {
@@ -163,6 +193,23 @@ export const App = () => {
   const deletePost = useCallback((deletedPost) => {
     setPosts(oldPosts => oldPosts.filter(oldPost => oldPost._id !== deletedPost))
   }, [])
+
+  useEffect(() => {
+    handleUsers()
+  }, [posts])
+
+  const handleScroll = useCallback((_e) => {
+    if (!loading && document.body.clientHeight - 100 < window.scrollY + window.innerHeight) {
+      setLoading(true)
+    }
+  }, [loading])
+
+  useEffect(() => {
+    window.addEventListener('scroll', (e) => handleScroll(e))
+    return (
+      window.removeEventListener('scroll', (e) => handleScroll(e))
+    )
+  }, [loading])
 
   return <div className="app">
     <MenuBar username={user.username} isAdmin={user.isAdmin} groups={groups} />
@@ -231,7 +278,7 @@ export const App = () => {
           <Post
             postId={post._id}
             title={post.title}
-            creatorName={post.creatorName}
+            creatorName={users[post.createdBy]}
             createdOn={post.createdOn}
             body={post.body}
             votesUp={post.votesUp}

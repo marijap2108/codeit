@@ -21,9 +21,9 @@ const createUser = async (req, res) => {
 
   try {
     const result = await db.collection("user").insertOne(newUser)
-    return res.status(200).json({id: result.insertedId})
+    return res.status(200).json({_id: result.insertedId})
   } catch (e) {
-    throw (`Probem with user create, ${e}`)
+    throw (`Problem with user create, ${e}`)
   }
 }
 
@@ -138,7 +138,7 @@ const getUser = async (req, res) => {
 
   const user = await getLoggedUser(req)
 
-  if (user) {
+  if (user && !id) {
     user.groups = await db.collection("group").find({_id: { $in: user.groups.map(group => new ObjectId(group)) }}).toArray()
     return res.status(200).json(user)
   }

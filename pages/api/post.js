@@ -20,7 +20,7 @@ const createPost = async (req, res) => {
     title: title,
     body: body,
     groupId: group,
-    createdBy: user._id,
+    createdBy: user._id, 
     createdOn: Date.now(),
     votesUp: [user._id],
     votesDown: []
@@ -103,6 +103,11 @@ const getPost = async (req, res) => {
   }
 
   const result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
+  const {username} = await db.collection("user").findOne({'_id': new  ObjectId(result.createdBy)})
+  const {title} = await db.collection("group").findOne({'_id': new  ObjectId(result.groupId)})
+
+  result.creatorUsername = username
+  result.groupName = title
 
   return res.status(200).json(result)
 }

@@ -31,6 +31,7 @@ const User = ({ user, initialPosts }) => {
   const [searchUser, setSearchUser] = useState(false)
   const [editUserData, setEditUserData] = useState({username: '', email: '', password: ''})
   const [appliedFilter, setAppliedFilter] = useState('post')
+  const [users, setUsers] = useState({[user._id]: user.username})
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/user?id=${cookies.codeItId}`, {
@@ -154,6 +155,31 @@ const User = ({ user, initialPosts }) => {
     setEditUserData({username: '', email: '', password: ''})
   })
 
+  const handleUsers = useCallback(() => {
+    const newUsers = [];
+    posts.map(({createdBy}) => {
+      if (!users[createdBy] && !newUsers.includes(createdBy)) {
+        newUsers.push(createdBy)
+      }
+    })
+
+    if (newUsers.length > 0) {
+      newUsers.map(id => (
+        fetch(`http://localhost:3000/api/user?id=${id}`, {
+          method: "GET"
+        }) 
+        .then(response => response.json())
+        .then(data => {
+          setUsers(oldUsers => ({...oldUsers, [data._id]: data.username}))
+        })
+      ))
+    }
+  }, [posts, users])
+
+  useEffect(() => {
+    handleUsers()
+  }, [posts])
+
   return (
     <div>
       <MenuBar isAdmin={user.isAdmin} username={loggedInUser.username} />
@@ -199,9 +225,7 @@ const User = ({ user, initialPosts }) => {
                       <PayPalButton
                         amount="1"
                         shippingPreference="NO_SHIPPING"
-                        onSuccess={(details, data) => {
-                          alert("Transaction completed by " + details.payer.name.given_name);
-
+                        onSuccess={() => {
                           return handleSaveUserData()
                           }
                         }
@@ -300,7 +324,7 @@ const User = ({ user, initialPosts }) => {
             <Post
               postId={post._id}
               title={post.title}
-              creatorName={post.creatorName}
+              creatorName={users[post.createdBy]}
               createdOn={post.createdOn}
               body={post.body}
               votesUp={post.votesUp}
