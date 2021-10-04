@@ -3,6 +3,7 @@ import { useCookies } from 'react-cookie';
 import { FiEdit2, FiTrash2, FiMoreHorizontal, FiDelete, FiCopy } from "react-icons/fi";
 import { Button, MenuBar, Post, Card, DropDown, Modal, CreateGroup, SearchUsers } from '../../components'
 import Router from 'next/router'
+import { PayPalButton } from "react-paypal-button-v2";
 
 export async function getServerSideProps({ params }) {
   const userRes = await fetch(`http://localhost:3000/api/user?id=${params.id}`)
@@ -195,7 +196,19 @@ const User = ({ user, initialPosts }) => {
                   </div>
                   {editUserData.username || editUserData.email ?
                     <div className="profile__actions">
-                      <Button onClick={handleSaveUserData}>Save Changes</Button>
+                      <PayPalButton
+                        amount="1"
+                        shippingPreference="NO_SHIPPING"
+                        onSuccess={(details, data) => {
+                          alert("Transaction completed by " + details.payer.name.given_name);
+
+                          return handleSaveUserData()
+                          }
+                        }
+                      options={{
+                        clientId: "AWrCP1zYwFh2r1ez1MsZdRaHUxOb9ZNDNbgWavNgeScyqQn8jQpoql4W7cI8sS0o1Sh0eYufPUx5XQm3"
+                      }}
+                      />
                       <Button onClick={handleCancelUserData}>Cancel Changes</Button>
                     </div>
                   :

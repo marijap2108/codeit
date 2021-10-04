@@ -29,7 +29,7 @@ export const Authentication = ({
     }) 
     .then(response => response.json())
     .then(data => {
-      setCookie('codeItId', data.id, { path: '/' })
+      setCookie('codeItId', data._id, { path: '/' })
       Router.reload(window.location.pathname)
     })
   }, [form])
@@ -42,7 +42,7 @@ export const Authentication = ({
     })
     .then(response => response.json())
     .then(data => {
-      setCookie('codeItId', data.id, { path: '/' })
+      setCookie('codeItId', data._id, { path: '/' })
       Router.reload(window.location.pathname)
     })
   }, [form])
