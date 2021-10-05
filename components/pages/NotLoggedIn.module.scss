@@ -1,22 +1,28 @@
+.home {
+  background: radial-gradient(
+    circle at -5% -5%,
+    rgb(147, 191, 241) 0%,
+    rgba(255, 255, 255, 1) 22%
+  );
+  padding: 0 90px;
+}
+
 .about {
-  padding: 120px 32px 80px 32px;
+  padding: 100px 0;
   display: flex;
   justify-content: space-between;
   z-index: 10;
-  background-color: blue;
-  clip-path: circle(70% at 50% -20%);
 }
 
 .aboutLeft {
   width: 60%;
   h1 {
-    color: white;
     font-size: 44px;
   }
   p {
-    color: white;
     font-size: 18px;
     font-weight: normal;
+    opacity: 0.8;
   }
 }
 
@@ -25,19 +31,20 @@
 }
 
 .features {
-  padding: 48px 32px 80px 32px;
-}
-
-.featuresHeader {
+  padding: 80px 0;
   display: flex;
-  justify-content: space-between;
-}
-
-.featureList {
-  display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  gap: 100px;
 }
 
 .feature {
-  border: 1px solid black;
+  display: flex;
+  justify-content: space-between;
+}
+.left {
+  width: 30%;
+}
+
+.right {
+  width: 30%;
 }

@@ -4,6 +4,10 @@ import { ObjectId } from 'mongodb';
 export const getLoggedUser = async (req) => { 
   const cookies = req.cookies
 
+  if (!cookies.codeItId) {
+    return
+  }
+
   const {db} = await connectToDatabase()
 
   try {

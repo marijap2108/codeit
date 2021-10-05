@@ -26,7 +26,7 @@ export const App = () => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/user?id=${cookies.codeItId}`, {
+    fetch(`http://localhost:3000/api/user`, {
       method: "GET"
     }) 
     .then(response => response.json())
@@ -58,16 +58,18 @@ export const App = () => {
     .then(data => {
       setSuggested(data)
     })
-  }, [cookies])
+  }, [])
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/groups?title=${router.query.search}`, {
-      method: "GET"
-    }) 
-    .then(response => response.json())
-    .then(data => {
-      setSuggestedGroups(data)
-    })
+    if (router.query.search) {
+      fetch(`http://localhost:3000/api/groups?title=${router.query.search}`, {
+        method: "GET"
+      }) 
+      .then(response => response.json())
+      .then(data => {
+        setSuggestedGroups(data)
+      })
+    }
   }, [router.query.search])
 
   const handleUsers = useCallback(() => {
@@ -108,6 +110,12 @@ export const App = () => {
 
     }
   }, [])
+
+
+  useEffect(() => {
+    setPosts([])
+    setStep(0)
+  }, [router.query.filter, sort])
 
   const openCreatePost = useCallback(() => {
     setNewPost(post => ({...post, isOpen: true}))
@@ -173,10 +181,6 @@ export const App = () => {
   useEffect(() => {
     setStep(step => step + 5)
   }, [loading])
-
-  useEffect(() => {
-    setPosts([])
-  }, [router.query.filter])
 
   const handleSort = useCallback((value) => () => {
     if (sort === value) {

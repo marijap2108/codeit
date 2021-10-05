@@ -1,21 +1,21 @@
 import { connectToDatabase } from "../../utils/mongodb"
+import { getLoggedUser } from "../../utils/getLoggedUser";
 import { ObjectId } from 'mongodb';
 
 const createComment = async (req, res) => {
   const {db} = await connectToDatabase()
-  const {parentId, parentType, body, createdBy} = req.body
+  const {parentId, body} = req.body
+  const cookies = req.cookies
 
-  if (!parentId || !body || !createdBy) {
-    return res.status(300).json()
+  if (!parentId || !body) {
+    return res.status(400).json()
   }
 
   const newComment = {
-    parentId: parentId,
-    parentType: parentType,
+    postId: parentId,
     body: body,
-    createdBy: createdBy,
-    createdOn: Date.now(),
-    voteCount: []
+    createdBy: cookies.codeItId,
+    createdOn: Date.now()
   }
 
   const result = await db.collection("comment").insertOne(newComment)
@@ -23,33 +23,25 @@ const createComment = async (req, res) => {
   return res.status(200).json({...newComment, id: result.insertedId})
 }
 
-const editComment = async (req, res) => {
-  const {db} = await connectToDatabase()
-  const {id, body} = req.body
-
-  if (!id) {
-    return res.status(300).json()
-  }
-
-  const result = await db.collection("comment").updateOne({'_id': new  ObjectId(id)},{$set: {body: body}})
-
-  return res.status(200).json(result)
-}
-
-const getComment = async (req, res) => {
+const deleteComment = async (req, res) => {
   const {db} = await connectToDatabase()
   const {id} = req.query
 
+  const user = await getLoggedUser(req)
+
   if (!id) {
-    return res.status(300).json()
+    return res.status(400).json()
   }
 
-  let result;
+  if (!user.isAdmin) {
+    const comment = await db.collection('comment').findOne({'_id': new ObjectId(id)})
 
-  if (id) {
-    result = await db.collection("post").findOne({ '_id': new  ObjectId(id) })
-    result = [result]
+    if (comment.createdBy !== user._id) {
+      return res.status(403).json()
+    }
   }
+
+  const result = await db.collection("comment").deleteOne({ '_id': new  ObjectId(id) })
 
   return res.status(200).json(result)
 }
@@ -58,10 +50,8 @@ export default async (req, res) => {
   switch(req.method) {
     case "POST":
       return await createComment(req, res)
-    case "PUT":
-      return await editComment(req, res)
-    case "GET":
-      return await getComment(req, res)
+    case "DELETE":
+      return await deleteComment(req, res)
     default:
       return res.status(404).json()
   }

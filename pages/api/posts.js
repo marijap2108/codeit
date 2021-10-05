@@ -37,7 +37,7 @@ const getPostsByUser = async (req, res) => {
   const {db} = await connectToDatabase()
   const {userid} = req.query
 
-  const result = await db.collection("post").find({createdBy: userid}).toArray()
+  const result = await db.collection("post").find({createdBy: new ObjectId(userid)}).toArray()
 
   return res.status(200).json(result)
 }

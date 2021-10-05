@@ -9,7 +9,7 @@ import { CreateGroup } from '../../pages/CreateGroup';
 
 export const MenuBar = ({isAdmin, username, groups}) => {
 
-	const [cookies, setCookie] = useCookies(['codeItId'])
+	const [cookies, _setCookie, removeCookies] = useCookies(['codeItId'])
 	const [search, setSearch] = useState('')
 	const [searchStyle, setSearchStyle] = useState({maxWidth: '30%'})
 	const [createGroup, setCreateGroup] = useState(false)
@@ -61,8 +61,12 @@ export const MenuBar = ({isAdmin, username, groups}) => {
 	}, [])
 
 	const handleLogOut = useCallback(() => {
-		setCookie("codeItId", "", {expires: 0})
-		Router.reload()
+		removeCookies("codeItId")
+		Router.push({
+			pathname: `/`,
+		}).then(() => {
+			Router.reload()
+		})
 	}, [])
 
 	const handleCreateGroup = useCallback(() => {

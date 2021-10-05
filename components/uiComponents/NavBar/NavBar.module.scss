@@ -1,5 +1,5 @@
 .navBar {
-  padding: 16px 32px;
+  padding: 16px 90px;
   display: flex;
   justify-content: space-between;
   position: fixed;
@@ -12,10 +12,18 @@
 .left {
   display: flex;
   justify-content: space-between;
-  gap: 100px;
+  gap: 40px;
+
+  img {
+    filter: invert(1);
+  }
 }
 
 .right {
   display: flex;
   gap: 12px;
+
+  b {
+    color: whitesmoke;
+  }
 }

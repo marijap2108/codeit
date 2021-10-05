@@ -262,20 +262,21 @@ const User = ({ user, initialPosts }) => {
                     <span>{group.title}</span>
                     <DropDown target={<FiMoreHorizontal />}>
                       <>
-                        <div onClick={handleOpenGroupModal(group)}>
-                          Edit
-                          {group.createdBy === cookies.codeItId || loggedInUser.isAdmin ?
-                            <FiEdit2/>
-                          :
-                            null
-                          }
-                        </div>
                         <div onClick={handleUnFollowGroup(group._id)}>
                           UnFollow <FiDelete />
                         </div>
-                        <div onClick={handleDeleteGroup(group._id)}>
-                          Delete <FiTrash2 />
-                        </div>
+                        {group.createdBy === cookies.codeItId || loggedInUser.isAdmin ?
+                          <>
+                            <div onClick={handleDeleteGroup(group._id)}>
+                              Delete <FiTrash2 />
+                            </div>
+                            <div onClick={handleOpenGroupModal(group)}>
+                              <FiEdit2/>
+                            </div>
+                          </>
+                        :
+                          null
+                        }
                       </>
                     </DropDown>
                   </div>

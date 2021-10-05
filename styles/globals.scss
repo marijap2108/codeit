@@ -167,7 +167,7 @@ h4 {
       flex-direction: column;
       gap: 24px;
       width: calc(100vw - 600px);
-      max-width: 600px;
+      max-width: 636px;
 
       .newPost {
         overflow: revert;
@@ -417,7 +417,52 @@ h4 {
 }
 
 .postPage {
-  margin: 24px 12px;
+  margin: 24px auto;
+  max-width: 1000px;
+
+  .comments {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .comment {
+      border-bottom: var(--card-border);
+
+      .userInfo {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+      }
+
+      .content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 8px;
+
+        svg {
+          flex-shrink: 0;
+          padding: 4px;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .newComment {
+      width: 100%;
+      display: flex;
+      gap: 12px;
+
+      input {
+        flex-grow: 1;
+      }
+
+      button {
+        width: 80px;
+      }
+    }
+  }
 }
 
 .searchUsers {
